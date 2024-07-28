@@ -3,10 +3,9 @@ import { BaseQueryFn } from "@reduxjs/toolkit/query/react";
 import axios, { AxiosRequestConfig, AxiosError } from "axios";
 import { toast } from "react-toastify";
 import { v4 as uuid } from "uuid";
-// import { revertAll } from "../feature/constants";
-import { ErrorCode } from "@/shared/constants/models";
-// import { setToken } from "@/redux/feature/user/userSlice";
+import { ErrorCode, revertAll } from "@/shared/constants/models";
 import { RootState } from "../store";
+import { setToken } from "../features/User";
 
 
 
@@ -123,8 +122,8 @@ export const APIBaseQuery: BaseQueryFn<IBaseQuery, unknown, unknown> = async (
         );
         if (refreshResult?.data) {
             const data: any = refreshResult?.data;
-            // const { token, refreshToken, expiresAt } = data;
-            // await state.dispatch(setToken({ token, refreshToken, expiresAt }));
+            const { token, refreshToken, expiresAt } = data;
+            await state.dispatch(setToken({ token, refreshToken, expiresAt }));
             result = await APIBaseQueryInterceptor(args, api, extraOptions);
         } else {
             errorNotifier("401 UNAUTHORIZED");

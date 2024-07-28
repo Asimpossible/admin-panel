@@ -3,30 +3,42 @@ import styles from './style.module.scss'
 import { useForm, Controller } from 'react-hook-form'
 import { Button, Input } from 'antd'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons'
+import { useLoginUserMutation } from '@/redux/api/auth'
+import { resetWarned } from 'antd/es/_util/warning'
 
 
 const Index: React.FC = () => {
-
-    const [password, setPassword] = React.useState<string>('')
+    const [postData] = useLoginUserMutation()
+    // Password Visibilty Button
     const [showPassword, setShowPassword] = React.useState<boolean>(false)
-
     const toggleShowPassword = () => {
         setShowPassword(!showPassword)
     }
-    const { control, formState: { errors }, handleSubmit } = useForm({
+
+    //React Hook Form
+    const { reset, control, formState: { errors, isSubmitSuccessful }, handleSubmit } = useForm({
         defaultValues: {
-            firstName: '',
+            username: '',
             password: ''
         },
 
     })
+    React.useEffect(() => {
+        if (isSubmitSuccessful) {
+            reset()
+        }
+    }, [isSubmitSuccessful, reset])
 
     type TData = {
-        firstName: string,
+        username: string,
         password: string
     }
     const onSubmit = (data: TData) => {
-        console.log(data)
+        postData(data)
+        try { () => { resetWarned() } }
+        catch (e) {
+            console.log(e)
+        }
     }
     console.log(errors)
 
@@ -38,7 +50,7 @@ const Index: React.FC = () => {
                     <h1 className={styles.formTitle}>Login</h1>
                     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
                         <Controller
-                            name='firstName'
+                            name='username'
                             control={control}
                             render={({ field }) => <Input {...field} type='email' placeholder='Name' className={styles.nameInput} />}
 
@@ -52,8 +64,6 @@ const Index: React.FC = () => {
                                     <Input
                                         {...field}
                                         type={showPassword ? 'text' : 'password'}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
                                         placeholder='Password'
                                         className={styles.passwordInput} />}
                             />

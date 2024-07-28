@@ -1,22 +1,26 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { IUser } from "./types";
+import { ILogin, IUser } from "./types";
+import { revertAll } from "@/shared/constants/models";
+import persistReducer from "redux-persist/es/persistReducer";
+import storage from "redux-persist/lib/storage";
 
-const initialState: IUser = {
-    id: 0,
-    email: '',
-    expiresAt: '',
-    firstName: '',
-    lastName: '',
-    refreshToken: '',
+const initialState: ILogin = {
+    user: {
+        id: 0,
+        email: '',
+        firstName: '',
+        lastName: '',
+        username: ''
+    },
     token: '',
-    username: ''
-
+    refreshToken: '',
+    expiresAt: ''
 }
 export const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
-        setToken: (state: IUser, action: PayloadAction<Pick<IUser, 'expiresAt' | 'refreshToken' | 'token'>>) => {
+        setToken: (state: ILogin, action: PayloadAction<Pick<ILogin, 'expiresAt' | 'refreshToken' | 'token'>>) => {
             const { refreshToken, expiresAt, token } = action.payload
             return {
                 ...state,
@@ -25,10 +29,26 @@ export const userSlice = createSlice({
                 refreshToken
             }
 
+        },
+        setUser: (state: ILogin, action: PayloadAction<IUser>) => {
+            state.user = action.payload
         }
-    }
+    },
+    extraReducers: (builder) => builder.addCase(revertAll, () => initialState)
 
 })
 
-export const { setToken } = userSlice.actions
-export default userSlice.reducer
+export const { setToken, setUser } = userSlice.actions
+
+const userPersist = persistReducer({
+    storage: storage,
+    key: 'Deyerlisen',
+    whitelist: [
+        'user',
+        'token',
+        'refreshToken',
+        'expiresAt'
+    ]
+}, userSlice.reducer)
+
+export default userPersist

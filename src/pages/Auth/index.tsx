@@ -5,10 +5,21 @@ import { Button, Input } from 'antd'
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons'
 import { useLoginUserMutation } from '@/redux/api/auth'
 import { resetWarned } from 'antd/es/_util/warning'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 
 const Index: React.FC = () => {
     const [postData] = useLoginUserMutation()
+
+    //Toastify
+    const onError = () => {
+        toast.error('There are errors in the form. Please fix them and try again.');
+        console.log(errors)
+    };
+
     // Password Visibilty Button
     const [showPassword, setShowPassword] = React.useState<boolean>(false)
     const toggleShowPassword = () => {
@@ -40,15 +51,13 @@ const Index: React.FC = () => {
             console.log(e)
         }
     }
-    console.log(errors)
-
 
     return (
         <>
             <div className={styles.wrapper}>
                 <div className={styles.formDiv}>
                     <h1 className={styles.formTitle}>Login</h1>
-                    <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+                    <form onSubmit={handleSubmit(onSubmit, onError)} className={styles.form}>
                         <Controller
                             name='username'
                             control={control}
@@ -74,6 +83,7 @@ const Index: React.FC = () => {
 
                         <button type='submit' className={styles.button}>Submit</button>
                     </form>
+                    <ToastContainer className={styles.toast} />
                 </div>
             </div>
         </>

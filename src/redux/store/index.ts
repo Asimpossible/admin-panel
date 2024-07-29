@@ -13,14 +13,15 @@ import {
 
 export const store = configureStore({
     reducer: reducer,
-    devTools: true,
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
             serializableCheck: {
                 ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
             },
         })
-            .concat(middleWares)
+            .concat(middleWares),
+    devTools: process.env.NODE_ENV !== 'production'
+
 })
 
 export const persistor = persistStore(store)

@@ -7,18 +7,23 @@ import {
     VideoCameraOutlined,
 } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd';
+import { revertAll } from '../constants/models';
+import { useAppDispatch } from '@/redux/store';
+import { Link } from 'react-router-dom';
 
 const { Header, Sider, Content } = Layout;
 
 interface IProps {
     children: React.ReactNode
 }
+
 const App: React.FC<IProps> = ({ children }) => {
     const [collapsed, setCollapsed] = useState(false);
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
+    const dispatch = useAppDispatch()
     return (
         <Layout style={{ width: '100vw', height: '100vh' }}>
             <Sider trigger={null} collapsible collapsed={collapsed}>
@@ -30,12 +35,13 @@ const App: React.FC<IProps> = ({ children }) => {
                     items={[
                         {
                             key: '1',
-                            icon: <UserOutlined />,
+                            icon: <UserOutlined onClick={() => <Link to={'/dashboard'} />} />,
                             label: 'nav 1',
+
                         },
                         {
                             key: '2',
-                            icon: <VideoCameraOutlined />,
+                            icon: <VideoCameraOutlined onClick={() => <Link to={'/userManagement'} />} />,
                             label: 'nav 2',
                         },
                         {
@@ -47,7 +53,7 @@ const App: React.FC<IProps> = ({ children }) => {
                 />
             </Sider>
             <Layout>
-                <Header style={{ padding: 0, background: colorBgContainer }}>
+                <Header style={{ padding: 0, background: colorBgContainer, display: 'flex', justifyContent: "space-between", alignItems: "center", paddingRight: " 20px" }}>
                     <Button
                         type="text"
                         icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -58,6 +64,8 @@ const App: React.FC<IProps> = ({ children }) => {
                             height: 64,
                         }}
                     />
+                    <Button onClick={() => dispatch(revertAll())}>Log Out</Button>
+
                 </Header>
                 <Content
                     style={{

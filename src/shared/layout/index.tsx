@@ -9,8 +9,7 @@ import {
 import { Button, Layout, Menu, theme } from 'antd';
 import { revertAll } from '../constants/models';
 import { useAppDispatch } from '@/redux/store';
-import { Link } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 const { Header, Sider, Content } = Layout;
 
 interface IProps {
@@ -24,6 +23,8 @@ const App: React.FC<IProps> = ({ children }) => {
     } = theme.useToken();
 
     const dispatch = useAppDispatch()
+    const navigate = useNavigate()
+
     return (
         <Layout style={{ width: '100vw', height: '100vh' }}>
             <Sider trigger={null} collapsible collapsed={collapsed}>
@@ -35,20 +36,21 @@ const App: React.FC<IProps> = ({ children }) => {
                     items={[
                         {
                             key: '1',
-                            icon: <UserOutlined onClick={() => <Link to={'/dashboard'} />} />,
+                            icon: <UserOutlined />,
                             label: 'nav 1',
-
+                            onClick: () => { navigate('/dashboard') }
                         },
                         {
                             key: '2',
-                            icon: <VideoCameraOutlined onClick={() => <Link to={'/userManagement'} />} />,
+                            icon: <VideoCameraOutlined />,
                             label: 'nav 2',
+                            onClick: () => { navigate('/userManagement') }
                         },
                         {
                             key: '3',
                             icon: <UploadOutlined />,
                             label: 'nav 3',
-                        }
+                        },
                     ]}
                 />
             </Sider>

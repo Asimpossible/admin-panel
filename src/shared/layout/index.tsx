@@ -51,6 +51,11 @@ const App: React.FC<IProps> = ({ children }) => {
                             icon: <UploadOutlined />,
                             label: 'nav 3',
                         },
+                        {
+                            key: '4',
+                            icon: <UploadOutlined />,
+                            label: 'assets'
+                        }
                     ]}
                 />
             </Sider>

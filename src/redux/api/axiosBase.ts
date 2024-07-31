@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { v4 as uuid } from "uuid";
 import { ErrorCode, revertAll } from "@/shared/constants/models";
 import { RootState } from "../store";
-import { setToken } from "../features/User";
+import { setToken } from "../features/Login";
 
 
 

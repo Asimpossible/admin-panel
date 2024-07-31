@@ -2,8 +2,8 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import { APIBaseQuery } from "../axiosBase";
 import { ISendData } from "./types";
-import { ILogin, IUser } from "@/redux/features/User/types";
-import { setToken, setUser } from "@/redux/features/User";
+import { ILogin, IUser } from "@/redux/features/Login/types";
+import { setToken, setUser } from "@/redux/features/Login";
 
 export const authApi = createApi({
     reducerPath: 'auth',

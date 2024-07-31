@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
-    UploadOutlined,
     UserOutlined,
-    VideoCameraOutlined,
 } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd';
 import { revertAll } from '../constants/models';
 import { useAppDispatch } from '@/redux/store';
 import { useNavigate } from 'react-router-dom';
 const { Header, Sider, Content } = Layout;
+import { FaUserShield, FaUserCog, FaUsers, FaHandshake } from "react-icons/fa";
+
 
 interface IProps {
     children: React.ReactNode
@@ -37,24 +37,32 @@ const App: React.FC<IProps> = ({ children }) => {
                         {
                             key: '1',
                             icon: <UserOutlined />,
-                            label: 'nav 1',
+                            label: 'Users',
                             onClick: () => { navigate('/dashboard') }
                         },
                         {
                             key: '2',
-                            icon: <VideoCameraOutlined />,
-                            label: 'nav 2',
-                            onClick: () => { navigate('/userManagement') }
+                            icon: <FaUserShield />,
+                            label: 'Assets',
+                            onClick: () => { navigate('/usermanagement') }
                         },
                         {
                             key: '3',
-                            icon: <UploadOutlined />,
-                            label: 'nav 3',
+                            icon: <FaUserCog />,
+                            label: 'HR Account',
+                            onClick: () => { navigate('/hraccount') }
                         },
                         {
                             key: '4',
-                            icon: <UploadOutlined />,
-                            label: 'assets'
+                            icon: <FaUsers />,
+                            label: 'Employee',
+                            onClick: () => { navigate('/employee') }
+                        },
+                        {
+                            key: '5',
+                            icon: <FaHandshake />,
+                            label: 'Partners',
+                            onClick: () => { navigate('/partner') }
                         }
                     ]}
                 />
@@ -78,7 +86,8 @@ const App: React.FC<IProps> = ({ children }) => {
                     style={{
                         margin: '24px 16px',
                         padding: 24,
-                        minHeight: 280,
+                        // minHeight: 280,
+                        height: '100%',
                         background: colorBgContainer,
                         borderRadius: borderRadiusLG,
                     }}

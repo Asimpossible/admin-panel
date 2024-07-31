@@ -1,136 +1,153 @@
+import { useGetUsersQuery, usePostUsersMutation } from '@/redux/api/users'
+import { ISendUser } from '@/redux/api/users/types'
+import { Table, Button, Drawer, Input, Form } from 'antd'
 import React from 'react'
-import { Button, Input, Table } from 'antd';
-import { Controller, useForm } from 'react-hook-form';
-import { useGetPartnerQuery, usePostPartnerMutation } from '@/redux/api/partner';
-import { resetWarned } from 'antd/es/_util/warning';
+import styles from './users.module.scss'
+import { Controller, useForm } from 'react-hook-form'
 
 const Index: React.FC = () => {
+    const { error, isLoading, data } = useGetUsersQuery()
+    const [postUser] = usePostUsersMutation()
 
-    const { data, error, isLoading } = useGetPartnerQuery();
-    const [postPartner] = usePostPartnerMutation();
+    //ANTD Drawer
+    const [open, setOpen] = React.useState(false);
+
+    const showDrawer = () => {
+        setOpen(true);
+    };
+
+    const onClose = () => {
+        setOpen(false);
+    };
 
     //React Hook Form
-
-    const { reset, control, formState: { errors, isSubmitSuccessful }, handleSubmit } = useForm({
+    const { control, formState: { errors }, handleSubmit } = useForm({
         defaultValues: {
-            name: '',
-            contactFirstName: '',
-            contactLastName: '',
-            phoneNum: 0,
+            firstname: '',
+            lastname: '',
             email: '',
-            city: {
-                chooseCity: '',
-                address: '',
-                latitude: '',
-                langitude: ''
-            }
+            phoneNum: '',
+            password: '',
+            confirmPassword: ''
         }
     })
-
-    React.useEffect(() => {
-        if (isSubmitSuccessful) {
-            reset()
-        }
-    }, [isSubmitSuccessful, reset])
+    console.error("Error ocurred with form", errors)
 
 
-    type TPartnerData = {
-        name: string
-        contactFirstName: string
-        contactLastName: string
-        phoneNum: number
-        email: string
+    const onFromSubmit = (data: ISendUser) => {
+        postUser(data)
     }
 
-
-    const onFromSubmit = (data: TPartnerData): void => {
-        postPartner(data)
-        try { () => { resetWarned() } }
-        catch (e) {
-            console.log(e)
-        }
-    }
-    console.log(errors)
-
-
-
-    if (isLoading) {
-        return <div>Loading...</div>
-    }
-
+    //Get Users Query
     if (error) {
-        return <div>Error loading data</div>
+        console.error('Error fetching users: ', error)
+        return <h2>Error fetching users</h2>
     }
 
-    const columns = [{
-        title: 'Partner Name',
-        dataIndex: 'name',
-        key: 'name'
-    },
-    {
-        title: 'Contact Person Fullname',
-        dataIndex: 'contactPerson',
-        key: 'contactPerson'
-    },
-    {
-        title: 'Phone Number',
-        dataIndex: 'phoneNumber',
-        key: 'phoneNumber'
-    },
-    {
-        title: 'Email',
-        dataIndex: 'email',
-        key: 'email'
-    }
-    ]
+    if (isLoading) return <h2>Loading...</h2>
 
-    const dataWithKeys = data?.data.map((item, index) => ({
+    //ANTD Table
+    const dataWithIndex = data?.data?.map((item, index) => ({
         ...item,
-        key: index
+        key: index,
+
     }))
 
-
+    const usersColumns = [
+        {
+            title: 'First Name',
+            dataIndex: 'firstName',
+            key: 'firstName',
+        },
+        {
+            title: 'Last Name',
+            dataIndex: 'lastName',
+            key: 'lastName',
+        },
+        {
+            title: 'Email',
+            dataIndex: 'email',
+            key: 'email',
+        },
+        {
+            title: 'Phone Number',
+            dataIndex: 'phone',
+            key: 'phoneNum',
+        },
+        {
+            title: 'Status',
+            dataIndex: 'isActive',
+            key: 'status',
+        },
+    ];
 
 
     return (
+
         <>
-            <Table
-                dataSource={dataWithKeys}
-                columns={columns}
-            />
-            <form onSubmit={handleSubmit(onFromSubmit)}>
-                <Controller
-                    name='name'
-                    control={control}
-                    render={({ field }) =>
-                        <Input {...field} type='text' placeholder='Partner Name' />}
-                />
-                <Controller
-                    name='contactFirstName'
-                    control={control}
-                    render={({ field }) =>
-                        <Input {...field} type='text' placeholder='Contact Person Firstname' />}
-                />
-                <Controller
-                    name='contactLastName'
-                    control={control}
-                    render={({ field }) =>
-                        <Input {...field} type='text' placeholder='Contact Person Lastname' />}
-                />
-                <Controller
-                    name='email'
-                    control={control}
-                    render={({ field }) =>
-                        <Input {...field} type='email' placeholder='Email' />}
-                />
-                <Controller
-                    name='phoneNum'
-                    control={control}
-                    render={({ field }) =>
-                        <Input {...field} type='number' placeholder='Phone Number' />}
-                />
-                <Button htmlType='submit'>Submit</Button>
-            </form>
+            <div className={styles.dashboardWrapper}>
+                <Button onClick={showDrawer}>Open the Drawer</Button>
+                <Table dataSource={dataWithIndex} columns={usersColumns} className={styles.table} />
+                <Drawer title="Create User" onClose={onClose} open={open}>
+                    <Form
+                        labelCol={{ span: 8 }}
+                        wrapperCol={{ span: 16 }}
+                        onFinish={handleSubmit(onFromSubmit)}
+                        className={styles.form}>
+
+                        <Form.Item label='First Name'>
+                            <Controller
+                                name='firstname'
+                                control={control}
+                                render={({ field }) =>
+
+                                    <Input {...field} type='text' placeholder='First Name' className={styles.input} />
+
+                                }
+                            />
+                        </Form.Item>
+
+                        <Controller
+                            name='lastname'
+                            control={control}
+                            render={({ field }) =>
+                                <Input {...field} type='text' placeholder='Last Name' className={styles.input} />
+                            }
+                        />
+                        <Controller
+                            name='email'
+                            control={control}
+                            render={({ field }) =>
+                                <Input {...field} type='email' placeholder='E-mail' className={styles.input} />
+                            }
+                        />
+                        <Controller
+                            name='phoneNum'
+                            control={control}
+                            render={({ field }) =>
+                                <Input {...field} type='number' placeholder='Phone Number' className={styles.input} />
+                            }
+                        />
+                        <Controller
+                            name='password'
+                            control={control}
+                            render={({ field }) =>
+                                <Input {...field} type='string' placeholder='Password' className={styles.input} />
+                            }
+                        />
+                        <Controller
+                            name='confirmPassword'
+                            control={control}
+                            render={({ field }) =>
+                                <Input {...field} type='string' placeholder='Confirm Password' className={styles.input} />
+                            }
+                        />
+                    </Form>
+                </Drawer>
+
+
+
+            </div >
         </>
     )
 }

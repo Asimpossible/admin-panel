@@ -1,9 +1,10 @@
 import { BaseQueryFn, createApi } from "@reduxjs/toolkit/query/react";
 import { APIBaseQuery } from "../axiosBase";
-import { ISendUser, IUsersData } from "./types";
+import { ISendUser, IUsers, IUsersData } from "./types";
+import { postUser } from "@/redux/features/User";
 
 export const userApi = createApi({
-    reducerPath: "user api",
+    reducerPath: "userApi",
     baseQuery: APIBaseQuery as BaseQueryFn,
     endpoints: (builder) => ({
         getUsers: builder.query<IUsersData, void>({
@@ -14,13 +15,22 @@ export const userApi = createApi({
                 }
             }
         }),
-        postUsers: builder.mutation<void, ISendUser>({
-            query() {
+        postUsers: builder.mutation<IUsersData, ISendUser>({
+            query(data: ISendUser) {
                 return {
                     url: 'user',
-                    method: 'POST'
+                    method: 'POST',
+                    data
                 }
-            }
+            },
+            async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled
+                    dispatch(postUser(data))
+                    console.log(data)
+                }
+                catch (e) { console.log('post error', e) }
+            },
         })
     })
 })

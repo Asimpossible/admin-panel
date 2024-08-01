@@ -10,17 +10,33 @@
 }
 
 .form {
-    @include m.flex($direction: column, $justify: start, $align: start, $gap: 10px)
+    @include m.flex($direction: column, $justify: start, $align: center, $gap: 30px)
 }
 
 .input {
     padding: 3px;
     border-radius: 4px;
-    border: 1px solid black;
     font-size: 17px;
+    border: none;
+    border-bottom: 0.5px solid black;
+    transition: 0.1s;
 
     &:hover,
     &:focus {
         outline: none;
+        border-bottom: 2px solid;
+        box-shadow: none
     }
+}
+
+/* Remove spinners for WebKit browsers in number type input */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Remove spinners for Firefox in number type input*/
+input[type=number] {
+    -moz-appearance: textfield;
 }

@@ -1,5 +1,5 @@
 export interface IUsersData {
-    data: IUsers[],
+    data: IUsers,
     totalCount: number
 }
 
@@ -8,21 +8,14 @@ export interface IUsers {
     lastName: string
     email: string
     phone: string
-    isActive: boolean
-    tools?: IUsersTools
+    isActive?: boolean
 }
 
-export interface IUsersTools {
-    view: boolean
-    edit: boolean
-    changePassword: boolean
-    delete: boolean
-}
 export interface ISendUser {
-    firstname: string
-    lastname: string
+    firstName: string
+    lastName: string
     email: string
-    phoneNum: string
+    phone: string
     password: string
     confirmPassword: string
 }

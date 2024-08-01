@@ -43,7 +43,7 @@ const Index: React.FC = () => {
     }
 
 
-    const onFromSubmit = (data: TPartnerData): void => {
+    const onFormSubmit = (data: TPartnerData): void => {
         postPartner(data)
         try { () => { resetWarned() } }
         catch (e) {
@@ -98,7 +98,7 @@ const Index: React.FC = () => {
                 dataSource={dataWithKeys}
                 columns={columns}
             />
-            <form onSubmit={handleSubmit(onFromSubmit)}>
+            <form onSubmit={handleSubmit(onFormSubmit)}>
                 <Controller
                     name='name'
                     control={control}

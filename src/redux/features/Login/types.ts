@@ -1,4 +1,3 @@
-import { IUsersTools } from "@/redux/api/users/types"
 
 export interface ILogin {
     user: IUser
@@ -13,5 +12,4 @@ export interface IUser {
     firstName: string,
     lastName: string,
     email: string,
-    tools?: IUsersTools
 }

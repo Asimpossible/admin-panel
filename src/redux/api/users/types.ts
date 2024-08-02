@@ -4,6 +4,7 @@ export interface IUsersData {
 }
 
 export interface IUsers {
+    id: 0
     firstName: string
     lastName: string
     email: string

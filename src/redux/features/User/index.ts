@@ -9,7 +9,8 @@ const initialState: IUsersData = {
         lastName: '',
         email: '',
         phone: '',
-        isActive: true
+        isActive: true,
+        id: 0
     },
     totalCount: 0
 }
@@ -20,6 +21,9 @@ const usersSlice = createSlice({
     reducers: {
         postUser: (state: IUsersData, action: PayloadAction<IUsers>) => {
             state.data = action.payload
+        },
+        deleteUser: (state: IUsersData, action: PayloadAction<number>) => {
+            state.data = state.data
         }
     }
 })

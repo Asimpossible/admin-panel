@@ -15,10 +15,10 @@ export const userApi = createApi({
                 }
             }
         }),
-        postUsers: builder.mutation<IUsersData, ISendUser>({
+        postUsers: builder.mutation<IUsers, ISendUser>({
             query(data: ISendUser) {
                 return {
-                    url: 'user',
+                    url: 'user/register',
                     method: 'POST',
                     data
                 }

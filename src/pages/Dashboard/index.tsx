@@ -4,14 +4,26 @@ import React from 'react'
 import styles from './users.module.scss'
 import { Controller, useForm } from 'react-hook-form'
 import { resetWarned } from 'antd/es/_util/warning'
-import { ISendUser } from '@/redux/api/users/types'
+import { ISendUser, IUsers, IUsersData } from '@/redux/api/users/types'
+import { IoEyeOutline } from 'react-icons/io5'
 
 const Index: React.FC = () => {
     const { data, error, isLoading } = useGetUsersQuery()
     const [postUser] = usePostUsersMutation()
 
+    //Change status of user
+    const [usersData, setUsersData] = React.useState<IUsersData[]>([])
+
+    const handleButtonClick = (record: IUsers) => {
+        const updated = usersData.map(user =>
+            user.data.id === record.id ? { ...user, isActive: !user.data.isActive } : user
+        );
+        console.log(updated)
+        setUsersData(updated)
+    }
+
     //ANTD Drawer
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = React.useState<boolean>(false);
 
     const showDrawer = () => {
         setOpen(true);
@@ -60,7 +72,8 @@ const Index: React.FC = () => {
     const dataWithIndex = Array.isArray(data?.data) ? data?.data.map((item, index) => ({
         ...item,
         key: index,
-    })) : [];
+    })
+    ) : [];
 
 
     const usersColumns = [
@@ -84,6 +97,22 @@ const Index: React.FC = () => {
             dataIndex: 'phone',
             key: 'phone',
         },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            render: (record: IUsers) => (
+                <Button onClick={() => handleButtonClick(record)}>
+                    <IoEyeOutline />
+                </Button>
+            )
+        },
+        {
+            title: 'Tools',
+            dataIndex: 'tools',
+            key: 'tools'
+        }
+
     ];
 
     return (

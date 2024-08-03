@@ -15,7 +15,7 @@ export const userApi = createApi({
                 }
             }
         }),
-        postUsers: builder.mutation<IUsers, ISendUser>({
+        postUsers: builder.mutation<IUsers[], ISendUser>({
             query(data: ISendUser) {
                 return {
                     url: 'user/register',

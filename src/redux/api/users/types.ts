@@ -1,10 +1,10 @@
 export interface IUsersData {
-    data: IUsers,
+    data: IUsers[],
     totalCount: number
 }
 
 export interface IUsers {
-    id: 0
+    id: number
     firstName: string
     lastName: string
     email: string

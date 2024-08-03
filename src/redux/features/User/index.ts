@@ -4,39 +4,37 @@ import persistReducer from "redux-persist/es/persistReducer";
 import storage from "redux-persist/lib/storage";
 
 const initialState: IUsersData = {
-    data: {
+    data: [{
         firstName: '',
         lastName: '',
         email: '',
         phone: '',
         isActive: true,
         id: 0
-    },
+    }],
     totalCount: 0
 }
 
-const usersSlice = createSlice({
+export const usersSlice = createSlice({
     name: 'users',
     initialState,
     reducers: {
-        postUser: (state: IUsersData, action: PayloadAction<IUsers>) => {
+        postUser: (state: IUsersData, action: PayloadAction<IUsers[]>) => {
             state.data = action.payload
         },
-        deleteUser: (state: IUsersData, action: PayloadAction<number>) => {
-            state.data = state.data
-        }
     }
 })
 
 export const { postUser } = usersSlice.actions
 
-const userReducer = persistReducer({
+const usersPersist = persistReducer({
     key: 'users',
     storage: storage,
     whitelist: [
-
+        'data',
+        'totalCount'
     ]
 
 }, usersSlice.reducer)
 
-export default userReducer;
+export default usersPersist;

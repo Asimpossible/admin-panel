@@ -1,52 +1,39 @@
-//! Status of users created but persist now working in status...
-
-import { useGetUsersQuery, usePostUsersMutation } from '@/redux/api/users'
-import { Table, Button, Drawer, Input } from 'antd'
+//! Delete User set bu not completed
+import { useDeleteUsersMutation, useGetUsersQuery, usePostUsersMutation } from '@/redux/api/users'
+import { Table, Button, Drawer, Input, Popconfirm } from 'antd'
 import React from 'react'
 import styles from './users.module.scss'
 import { Controller, useForm } from 'react-hook-form'
 import { resetWarned } from 'antd/es/_util/warning'
 import { ISendUser, IUsers } from '@/redux/api/users/types'
 import { DeleteOutlined } from '@ant-design/icons'
-import { useAppSelector } from '@/redux/store'
+import { useAppDispatch, useAppSelector } from '@/redux/store'
+import { deleteUser, postUser, toggleUserStatus } from '@/redux/features/User'
 
 const Index: React.FC = () => {
     const { data, error, isLoading } = useGetUsersQuery()
-    const [postUser] = usePostUsersMutation()
-    const data2 = useAppSelector(state => state.users.data)
-    console.log('Current users data: ', data2)
-
+    const [postingUser] = usePostUsersMutation()
+    const [deleteUserApi] = useDeleteUsersMutation()
+    const dispatch = useAppDispatch();
+    const usersData = useAppSelector(state => state.users.data) || []
 
     //Change status of user
-    const [usersData, setUsersData] = React.useState<IUsers[]>([]);
     React.useEffect(() => {
         if (data?.data) {
-            console.log("1. Data fetched from API: ", data.data); // Log fetched data
-            setUsersData(data.data);
+            dispatch(postUser(data?.data))
         }
-    }, [data]);
-
-    React.useEffect(() => {
-        console.log("2. usersData state after setting from API data: ", usersData); // Log usersData state
-    }, [usersData]);
+    }, [data, dispatch]);
 
     // Function to handle status change
     const handleButtonClick = (id: number) => {
-        console.log("3. ID received by handleButtonClick: ", id); // Log the ID received
-        console.log("4. usersData before map operation: ", usersData); // Log usersData before map
-
-        const updated = usersData.map(user => {
-            console.log("5. Current user in map function: ", user); // Log each user object in map
-            console.log("6. Current user.id: ", user.id); // Log user.id in map
-            if (user.id === id) {
-                return { ...user, isActive: !user.isActive };
-            }
-            return user;
-        });
-
-        console.log("7. usersData after map operation: ", updated); // Log updated usersData
-        setUsersData(updated);
+        dispatch(toggleUserStatus(id))
     };
+
+    //Function to delete user
+    const handleDeleteUser = async (id: number) => {
+        await deleteUserApi(id)
+        dispatch(deleteUser(id))
+    }
 
     //ANTD Drawer
     const [open, setOpen] = React.useState<boolean>(false);
@@ -78,7 +65,7 @@ const Index: React.FC = () => {
     }, [isSubmitSuccessful, reset])
 
     const onFormSubmit = (data: ISendUser): void => {
-        postUser(data)
+        postingUser(data)
         try { () => { resetWarned() } }
         catch (e) {
             console.log(e)
@@ -136,10 +123,17 @@ const Index: React.FC = () => {
             title: 'Tools',
             dataIndex: 'tools',
             key: 'tools',
-            render: () => (
-                <Button>
-                    <DeleteOutlined />
-                </Button >
+            render: (_: unknown, record: IUsers) => (
+                <Popconfirm
+                    title="Are you sure you want to delete this user?"
+                    onConfirm={() => handleDeleteUser(record.id)}
+                    okText="Yes"
+                    cancelText="No"
+                >
+                    <Button>
+                        <DeleteOutlined />
+                    </Button>
+                </Popconfirm>
             )
         }
 

@@ -31,8 +31,16 @@ export const userApi = createApi({
                 }
                 catch (e) { console.log('post error', e) }
             },
+        }),
+        deleteUsers: builder.mutation<IUsersData, number>({
+            query() {
+                return {
+                    url: 'user',
+                    method: 'DELETE'
+                }
+            }
         })
     })
 })
 
-export const { useGetUsersQuery, usePostUsersMutation } = userApi
+export const { useGetUsersQuery, usePostUsersMutation, useDeleteUsersMutation } = userApi

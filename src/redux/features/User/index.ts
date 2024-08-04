@@ -21,11 +21,21 @@ export const usersSlice = createSlice({
     reducers: {
         postUser: (state: IUsersData, action: PayloadAction<IUsers[]>) => {
             state.data = action.payload
+            state.totalCount = action.payload.length
         },
+        toggleUserStatus: (state, action: PayloadAction<number>) => {
+            const user = state.data.find(user => user.id === action.payload)
+            if (user) {
+                user.isActive = !user.isActive
+            }
+        },
+        deleteUser: (state, action: PayloadAction<number>) => {
+            state.data.filter(user => user.id !== action.payload)
+        }
     }
 })
 
-export const { postUser } = usersSlice.actions
+export const { postUser, toggleUserStatus, deleteUser } = usersSlice.actions
 
 const usersPersist = persistReducer({
     key: 'users',

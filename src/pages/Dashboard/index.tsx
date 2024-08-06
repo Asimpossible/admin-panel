@@ -1,21 +1,37 @@
-//! Delete User set bu not completed
+//! view drawer, delete user don't working
 import { useDeleteUsersMutation, useGetUsersQuery, usePostUsersMutation } from '@/redux/api/users'
-import { Table, Button, Drawer, Input, Popconfirm } from 'antd'
+import { Table, Button, Drawer, Input, Modal } from 'antd'
 import React from 'react'
 import styles from './users.module.scss'
 import { Controller, useForm } from 'react-hook-form'
 import { resetWarned } from 'antd/es/_util/warning'
 import { ISendUser, IUsers } from '@/redux/api/users/types'
-import { DeleteOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EyeOutlined } from '@ant-design/icons'
 import { useAppDispatch, useAppSelector } from '@/redux/store'
 import { deleteUser, postUser, toggleUserStatus } from '@/redux/features/User'
 
-const Index: React.FC = () => {
+interface ViewDrawerProps {
+    onClick: () => void;
+}
+
+const Index: React.FC<ViewDrawerProps> = ({ onClick }) => {
+
     const { data, error, isLoading } = useGetUsersQuery()
     const [postingUser] = usePostUsersMutation()
     const [deleteUserApi] = useDeleteUsersMutation()
-    const dispatch = useAppDispatch();
+    const dispatch = useAppDispatch()
     const usersData = useAppSelector(state => state.users.data) || []
+
+    //ANTD Modal
+    const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+    const showModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
 
     //Change status of user
     React.useEffect(() => {
@@ -33,17 +49,18 @@ const Index: React.FC = () => {
     const handleDeleteUser = async (id: number) => {
         await deleteUserApi(id)
         dispatch(deleteUser(id))
+        setIsModalOpen(false)
     }
 
-    //ANTD Drawer
-    const [open, setOpen] = React.useState<boolean>(false);
+    //ANTD Input Drawer
+    const [inputOpen, setInputOpen] = React.useState<boolean>(false);
 
-    const showDrawer = () => {
-        setOpen(true);
+    const showInputDrawer = () => {
+        setInputOpen(true);
     };
 
-    const onClose = () => {
-        setOpen(false);
+    const oninputClose = () => {
+        setInputOpen(false);
     };
 
     //React Hook Form
@@ -124,16 +141,22 @@ const Index: React.FC = () => {
             dataIndex: 'tools',
             key: 'tools',
             render: (_: unknown, record: IUsers) => (
-                <Popconfirm
-                    title="Are you sure you want to delete this user?"
-                    onConfirm={() => handleDeleteUser(record.id)}
-                    okText="Yes"
-                    cancelText="No"
-                >
-                    <Button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    {/* View Button*/}
+                    <button className={styles.viewButton} onClick={onClick}>
+                        <EyeOutlined />
+                    </button>
+
+                    {/* Delete Button*/}
+                    <button className={styles.deleteButton} onClick={() => {
+                        showModal()
+                    }}>
                         <DeleteOutlined />
-                    </Button>
-                </Popconfirm>
+                    </button>
+                    <Modal mask={false} title="Delete" open={isModalOpen} onOk={() => handleDeleteUser(record.id)} onCancel={handleCancel} okText={'Delete'} onClose={handleCancel} centered={true}>
+                        <h3>Are you sure to delete?</h3>
+                    </Modal>
+                </div>
             )
         }
 
@@ -143,9 +166,10 @@ const Index: React.FC = () => {
 
         <>
             <div className={styles.dashboardWrapper}>
-                <Button onClick={showDrawer}>Open the Drawer</Button>
-                <Table size='middle' dataSource={dataWithIndex} columns={usersColumns} className={styles.table} />
-                <Drawer title="Create User" onClose={onClose} open={open}>
+                <Button onClick={showInputDrawer} style={{ marginBottom: '13px', border: '1px solid black' }}>Open the Drawer</Button>
+                <Table pagination={{ defaultPageSize: 8, showSizeChanger: false }}
+                    size='middle' dataSource={dataWithIndex} columns={usersColumns} className={styles.table} />
+                <Drawer title="Create User" onClose={oninputClose} open={inputOpen}>
                     <form onSubmit={handleSubmit(onFormSubmit)} className={styles.form}>
                         <Controller
                             control={control}
@@ -182,6 +206,7 @@ const Index: React.FC = () => {
                             name='confirmPassword'
                             render={({ field }) => <Input {...field} type='text' placeholder='Confirm Password' className={styles.input} />}
                         />
+
                         <Button htmlType='submit'>Create user</Button>
                     </form >
                 </Drawer >

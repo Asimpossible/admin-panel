@@ -31,37 +31,38 @@ const App: React.FC<IProps> = ({ children }) => {
             <Sider trigger={null} collapsible collapsed={collapsed}>
                 <div className="demo-logo-vertical" />
                 <Menu
+                    style={{ marginTop: '11px' }}
                     theme="dark"
                     mode="inline"
                     defaultSelectedKeys={['1']}
                     items={[
                         {
                             key: '1',
-                            icon: <UserOutlined />,
+                            icon: <UserOutlined style={{ fontSize: "23px" }} />,
                             label: 'Users',
                             onClick: () => { navigate('/dashboard') }
                         },
                         {
                             key: '2',
-                            icon: <FaUserShield />,
+                            icon: <FaUserShield style={{ fontSize: "23px" }} />,
                             label: 'Assets',
                             onClick: () => { navigate('/usermanagement') }
                         },
                         {
                             key: '3',
-                            icon: <FaUserCog />,
+                            icon: <FaUserCog style={{ fontSize: "23px" }} />,
                             label: 'HR Account',
                             onClick: () => { navigate('/hraccount') }
                         },
                         {
                             key: '4',
-                            icon: <FaUsers />,
+                            icon: <FaUsers style={{ fontSize: "23px" }} />,
                             label: 'Employee',
                             onClick: () => { navigate('/employee') }
                         },
                         {
                             key: '5',
-                            icon: <FaHandshake />,
+                            icon: <FaHandshake style={{ fontSize: "23px" }} />,
                             label: 'Partners',
                             onClick: () => { navigate('/partner') }
                         }
@@ -72,7 +73,7 @@ const App: React.FC<IProps> = ({ children }) => {
                 <Header style={{ padding: 0, background: colorBgContainer, display: 'flex', justifyContent: "space-between", alignItems: "center", paddingRight: " 20px" }}>
                     <Button
                         type="text"
-                        icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                        icon={collapsed ? <MenuUnfoldOutlined style={{ fontSize: '24px' }} /> : <MenuFoldOutlined style={{ fontSize: '24px' }} />}
                         onClick={() => setCollapsed(!collapsed)}
                         style={{
                             fontSize: '16px',

@@ -1,26 +1,63 @@
-//! view drawer, delete user don't working
+//! zod validate not completed, view the record 
 import { useDeleteUsersMutation, useGetUsersQuery, usePostUsersMutation } from '@/redux/api/users'
 import { Table, Button, Drawer, Input, Modal } from 'antd'
 import React from 'react'
 import styles from './users.module.scss'
 import { Controller, useForm } from 'react-hook-form'
-import { resetWarned } from 'antd/es/_util/warning'
 import { ISendUser, IUsers } from '@/redux/api/users/types'
 import { DeleteOutlined, EyeOutlined } from '@ant-design/icons'
 import { useAppDispatch, useAppSelector } from '@/redux/store'
 import { deleteUser, postUser, toggleUserStatus } from '@/redux/features/User'
+import { FaUserAlt } from 'react-icons/fa'
+import { MdEmail } from 'react-icons/md'
+import { GrStatusGood } from 'react-icons/gr'
+import { useNavigate } from 'react-router-dom'
+import * as zod from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 
-interface ViewDrawerProps {
-    onClick: () => void;
-}
-
-const Index: React.FC<ViewDrawerProps> = ({ onClick }) => {
+const Index: React.FC = () => {
 
     const { data, error, isLoading } = useGetUsersQuery()
     const [postingUser] = usePostUsersMutation()
     const [deleteUserApi] = useDeleteUsersMutation()
     const dispatch = useAppDispatch()
     const usersData = useAppSelector(state => state.users.data) || []
+    //For reset current page in on form submit and delete user
+    const navigate = useNavigate()
+
+    //Validation for React-Hook-Form
+    const schema = zod.object({})
+
+    //Post User Form
+    const { reset, control, formState: { errors, isSubmitSuccessful }, handleSubmit } = useForm({
+        defaultValues: {
+            firstName: '',
+            lastName: '',
+            email: '',
+            phone: '',
+            password: '',
+            confirmPassword: ''
+        },
+        resolver: zodResolver(schema)
+    })
+
+    React.useEffect(() => {
+        if (isSubmitSuccessful) {
+            reset()
+        }
+    }, [isSubmitSuccessful, reset])
+
+    const onFormSubmit = (data: ISendUser): void => {
+
+        try {
+            postingUser(data).unwrap()
+            reset();
+        }
+        catch (e) {
+            console.error('Error occurred in form submission: ', e)
+        }
+        console.error('Error ocurred in form', errors)
+    }
 
     //ANTD Modal
     const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -47,9 +84,16 @@ const Index: React.FC<ViewDrawerProps> = ({ onClick }) => {
 
     //Function to delete user
     const handleDeleteUser = async (id: number) => {
-        await deleteUserApi(id)
-        dispatch(deleteUser(id))
-        setIsModalOpen(false)
+        try {
+            await deleteUserApi(id)
+            dispatch(deleteUser(id))
+            setIsModalOpen(false)
+            reset()
+            navigate(0)
+        }
+        catch (error) {
+            console.error('Error occurred with delete user', error)
+        }
     }
 
     //ANTD Input Drawer
@@ -59,50 +103,35 @@ const Index: React.FC<ViewDrawerProps> = ({ onClick }) => {
         setInputOpen(true);
     };
 
-    const oninputClose = () => {
+    const onInputClose = () => {
         setInputOpen(false);
     };
 
-    //React Hook Form
-    const { reset, control, formState: { errors, isSubmitSuccessful }, handleSubmit } = useForm({
-        defaultValues: {
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            password: '',
-            confirmPassword: ''
-        }
-    })
-
-    React.useEffect(() => {
-        if (isSubmitSuccessful) {
-            reset()
-        }
-    }, [isSubmitSuccessful, reset])
-
-    const onFormSubmit = (data: ISendUser): void => {
-        postingUser(data)
-        try { () => { resetWarned() } }
-        catch (e) {
-            console.log(e)
-        }
-        console.error('Error ocurred in form', errors)
+    //ANTD View Drawer
+    const [visible, setVisible] = React.useState<boolean>(false)
+    const [drawerContent, setDrawerContent] = React.useState<IUsers | null>(null);
+    const showViewDrawer = (record: IUsers) => {
+        setDrawerContent(record);
+        setVisible(true)
+    }
+    const onDrawerClose = () => {
+        setVisible(false)
+        setDrawerContent(null)
     }
 
     //Get Users Query
     if (error) {
         console.error('Error fetching users ', error)
-        return <h2>Error fetching users</h2>
+        return <h2>Error fetching users. Please try again later...</h2>
     }
 
-    if (isLoading) return <h2>Loading...</h2>
+    if (isLoading) return <h2>Loading users...</h2>
 
     //ANTD Table
     const dataWithIndex = usersData.map((item, index) => ({
         ...item,
         key: index,
-    }));
+    })) || [];
 
 
     const usersColumns = [
@@ -131,7 +160,7 @@ const Index: React.FC<ViewDrawerProps> = ({ onClick }) => {
             dataIndex: 'status',
             key: 'status',
             render: (_: unknown, record: IUsers) => (
-                <Button onClick={() => handleButtonClick(record.id)}>
+                <Button style={{}} onClick={() => handleButtonClick(record.id)}>
                     {record.isActive ? 'Active' : 'Inactive'}
                 </Button>
             )
@@ -143,20 +172,78 @@ const Index: React.FC<ViewDrawerProps> = ({ onClick }) => {
             render: (_: unknown, record: IUsers) => (
                 <div style={{ display: 'flex', gap: '10px' }}>
                     {/* View Button*/}
-                    <button className={styles.viewButton} onClick={onClick}>
+                    <button className={styles.viewButton} onClick={() => showViewDrawer(record)}>
                         <EyeOutlined />
                     </button>
+                    <Drawer title="Basic Drawer" onClose={onDrawerClose} open={visible} mask={false}>
+                        {drawerContent && (
+
+                            <div className={styles.card}>
+                                <div className={styles.tools}>
+                                    <div className={styles.circle}>
+                                        <span className={`${styles.red} ${styles.box}`}></span>
+                                    </div>
+                                    <div className={styles.circle}>
+                                        <span className={`${styles.yellow} ${styles.box}`}></span>
+                                    </div>
+                                    <div className={styles.circle}>
+                                        <span className={`${styles.green} ${styles.box}`}></span>
+                                    </div>
+                                </div>
+                                <div className={styles.card__content}>
+                                    <div className={styles.contentDiv}>
+                                        <div className={styles.contentIcon}><FaUserAlt /></div>
+                                        <div className={styles.contentInnerDiv}>
+                                            <div className={styles.content}>
+                                                {drawerContent.firstName}
+                                            </div>
+                                            <div className={styles.contentInner}>First Name</div>
+                                        </div>
+                                    </div>
+                                    <div className={styles.contentDiv}>
+                                        <div className={styles.contentIcon}><FaUserAlt /></div>
+                                        <div className={styles.contentInnerDiv}>
+                                            <div className={styles.content}>
+                                                {drawerContent.lastName}
+                                            </div>
+                                            <div className={styles.contentInner}>Last Name</div>
+                                        </div>
+                                    </div>
+                                    <div className={styles.contentDiv}>
+                                        <div className={styles.contentIcon}><MdEmail /></div>
+                                        <div className={styles.contentInnerDiv}>
+                                            <div className={styles.content}>
+                                                {drawerContent.email}
+                                            </div>
+                                            <div className={styles.contentInner}>Email</div>
+                                        </div>
+                                    </div>
+                                    <div className={styles.contentDiv}>
+                                        <div className={styles.contentIcon}><GrStatusGood /></div>
+                                        <div className={styles.contentInnerDiv}>
+                                            <div className={styles.content}>
+                                                {drawerContent.isActive ? 'Active' : 'InActive'}
+                                            </div>
+                                            <div className={styles.contentInner}>Status</div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        )}
+                    </Drawer >
 
                     {/* Delete Button*/}
-                    <button className={styles.deleteButton} onClick={() => {
+                    < button className={styles.deleteButton} onClick={() => {
                         showModal()
                     }}>
                         <DeleteOutlined />
-                    </button>
+                    </button >
                     <Modal mask={false} title="Delete" open={isModalOpen} onOk={() => handleDeleteUser(record.id)} onCancel={handleCancel} okText={'Delete'} onClose={handleCancel} centered={true}>
                         <h3>Are you sure to delete?</h3>
                     </Modal>
-                </div>
+                </div >
             )
         }
 
@@ -169,7 +256,7 @@ const Index: React.FC<ViewDrawerProps> = ({ onClick }) => {
                 <Button onClick={showInputDrawer} style={{ marginBottom: '13px', border: '1px solid black' }}>Open the Drawer</Button>
                 <Table pagination={{ defaultPageSize: 8, showSizeChanger: false }}
                     size='middle' dataSource={dataWithIndex} columns={usersColumns} className={styles.table} />
-                <Drawer title="Create User" onClose={oninputClose} open={inputOpen}>
+                <Drawer title="Create User" onClose={onInputClose} open={inputOpen}>
                     <form onSubmit={handleSubmit(onFormSubmit)} className={styles.form}>
                         <Controller
                             control={control}

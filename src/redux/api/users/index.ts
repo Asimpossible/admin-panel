@@ -32,11 +32,15 @@ export const userApi = createApi({
                 catch (e) { console.log('post error', e) }
             },
         }),
-        deleteUsers: builder.mutation<IUsersData, number>({
-            query() {
+        deleteUsers: builder.mutation<void, number>({
+            query(id: number) {
                 return {
                     url: 'user',
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    data: { id: [id] },
+                    headers: {
+                        'Content-Type': 'appplication/json'
+                    }
                 }
             }
         })

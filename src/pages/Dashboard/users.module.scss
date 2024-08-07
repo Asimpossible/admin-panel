@@ -43,19 +43,9 @@ input[type=number] {
 
 .statusBtn {
 
-    /* From Uiverse.io by bandirevanth */
-    /* Switch starts here */
     .rocker {
         display: inline-block;
         position: relative;
-        /*
-    SIZE OF SWITCH
-    ==============
-    All sizes are in em - therefore
-    changing the font-size here
-    will change the size of the switch.
-    See .rocker-small below as example.
-    */
         font-size: 2em;
         font-weight: bold;
         text-align: center;
@@ -236,5 +226,79 @@ input[type=number] {
 
     &:active {
         transform: scale(0.9);
+    }
+}
+
+
+.card {
+    width: 300px;
+    height: 350px;
+    color: white;
+    margin: 0 auto;
+    background-color: #011522;
+    border-radius: 8px;
+    z-index: 1;
+    position: absolute;
+    top: 150px;
+    left: 46px;
+
+    .tools {
+        display: flex;
+        align-items: center;
+        padding: 9px;
+
+
+        .circle {
+            padding: 0 4px;
+        }
+
+        .box {
+            display: inline-block;
+            align-items: center;
+            width: 10px;
+            height: 10px;
+            padding: 1px;
+            border-radius: 50%;
+        }
+    }
+
+    .red {
+        background-color: #ff605c;
+    }
+
+    .yellow {
+        background-color: #ffbd44;
+    }
+
+    .green {
+        background-color: #00ca4e;
+    }
+
+    .card__content {
+        margin: 10px 30px;
+
+        .contentDiv {
+            font-size: 17px;
+            @include m.flex($gap: 17px, $justify: left, $align: center);
+            margin-bottom: 30px;
+
+            .content {
+                width: 240px;
+                white-space: wrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                color: #ff605c;
+            }
+
+            .contentIcon {
+                font-size: 19px;
+                color: #00ca4e;
+            }
+
+            .contentInner {
+                color: #ffbd44;
+                font-size: 13px;
+            }
+        }
     }
 }

@@ -179,54 +179,16 @@ input[type=number] {
 }
 
 .viewButton {
-    width: 45px;
-    height: 30px;
-    position: relative;
-    text-align: center;
-    font-size: 16px;
-    letter-spacing: 1px;
-    text-decoration: none;
-    color: green;
-    background: transparent;
-    cursor: pointer;
-    transition: ease-out 0.5s;
-    border: 2px solid green;
-    border-radius: 10px;
-    box-shadow: inset 0 0 0 0 green;
+    @include m.toolsButton($color: green);
 
-    &:hover {
-        color: white !important;
-        box-shadow: inset 0 -100px 0 0 green;
-    }
+}
 
-    &:active {
-        transform: scale(0.9);
-    }
+.editButton {
+    @include m.toolsButton($color: rgb(47, 47, 158))
 }
 
 .deleteButton {
-    width: 45px;
-    position: relative;
-    text-align: center;
-    font-size: 16px;
-    letter-spacing: 1px;
-    text-decoration: none;
-    color: orangered;
-    background: transparent;
-    cursor: pointer;
-    transition: ease-out 0.5s;
-    border: 2px solid orangered;
-    border-radius: 10px;
-    box-shadow: inset 0 0 0 0 orangered;
-
-    &:hover {
-        color: white !important;
-        box-shadow: inset 0 -100px 0 0 orangered;
-    }
-
-    &:active {
-        transform: scale(0.9);
-    }
+    @include m.toolsButton($color: orangered)
 }
 
 

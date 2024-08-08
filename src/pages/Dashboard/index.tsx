@@ -8,12 +8,13 @@ import { ISendUser, IUsers } from '@/redux/api/users/types'
 import { DeleteOutlined, EyeOutlined } from '@ant-design/icons'
 import { useAppDispatch, useAppSelector } from '@/redux/store'
 import { deleteUser, postUser, toggleUserStatus } from '@/redux/features/User'
-import { FaUserAlt } from 'react-icons/fa'
+import { FaUserAlt, FaUserEdit } from 'react-icons/fa'
 import { MdEmail } from 'react-icons/md'
 import { GrStatusGood } from 'react-icons/gr'
 import { useNavigate } from 'react-router-dom'
-import * as zod from 'zod'
+import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { RenderIf } from '@/shared/components'
 
 const Index: React.FC = () => {
 
@@ -25,8 +26,17 @@ const Index: React.FC = () => {
     //For reset current page in on form submit and delete user
     const navigate = useNavigate()
 
-    //Validation for React-Hook-Form
-    const schema = zod.object({})
+    //Zod Validation for React-Hook-Form
+    const schema = z.object({
+        firstName: z.string().min(),
+        lastName: z.string(),
+        email: z.string(),
+        phone: z.number(),
+        password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
+        confirmPassword: z.string()
+    })
+
+
 
     //Post User Form
     const { reset, control, formState: { errors, isSubmitSuccessful }, handleSubmit } = useForm({
@@ -58,6 +68,20 @@ const Index: React.FC = () => {
         }
         console.error('Error ocurred in form', errors)
     }
+
+    //Edit user drawer
+    const [drawerVisible, setDrawerVisible] = React.useState(false);
+    const [currentUser, setCurrentUser] = React.useState<IUsers | null>(null);
+
+    const showEditDrawer = (user: IUsers) => {
+        setCurrentUser(user);
+        setDrawerVisible(true);
+    };
+
+    const closeEditDrawer = () => {
+        setDrawerVisible(false);
+        setCurrentUser(null);
+    };
 
     //ANTD Modal
     const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -234,6 +258,53 @@ const Index: React.FC = () => {
                         )}
                     </Drawer >
 
+                    {/*Edit Button */}
+                    <button className={styles.editButton} onClick={() => showEditDrawer(record)}>
+                        <FaUserEdit />
+                        <Drawer title="Edit User" mask={false} onClose={closeEditDrawer} open={drawerVisible}>
+                            <form onSubmit={handleSubmit(onFormSubmit)} className={styles.form}>
+                                <Controller
+                                    control={control}
+                                    name='firstName'
+                                    render={({ field }) => <Input {...field} type='text' value={record.firstName} placeholder='First Name' className={styles.input} />}
+                                />
+
+                                <Controller
+                                    control={control}
+                                    name='lastName'
+                                    render={({ field }) => <Input {...field} type='text' placeholder='Last Name' className={styles.input} />}
+                                />
+
+                                <Controller
+                                    control={control}
+                                    name='email'
+                                    render={({ field }) => <Input {...field} type='email' placeholder='Email' className={styles.input} />}
+                                />
+
+                                <Controller
+                                    control={control}
+                                    name='phone'
+                                    render={({ field }) => <Input {...field} type='number' placeholder='Phone Number' className={styles.input} />}
+                                />
+
+                                <Controller
+                                    control={control}
+                                    name='password'
+                                    render={({ field }) => <Input {...field} type='text' placeholder='Password' className={styles.input} />}
+                                />
+
+                                <Controller
+                                    control={control}
+                                    name='confirmPassword'
+                                    render={({ field }) => <Input {...field} type='text' placeholder='Confirm Password' className={styles.input} />}
+                                />
+
+                                <Button htmlType='submit'>Create user</Button>
+                            </form >
+                        </Drawer >
+                    </button>
+
+
                     {/* Delete Button*/}
                     < button className={styles.deleteButton} onClick={() => {
                         showModal()
@@ -253,7 +324,7 @@ const Index: React.FC = () => {
 
         <>
             <div className={styles.dashboardWrapper}>
-                <Button onClick={showInputDrawer} style={{ marginBottom: '13px', border: '1px solid black' }}>Open the Drawer</Button>
+                <Button onClick={showInputDrawer} style={{ marginBottom: '13px', border: '1px solid black' }}>Create the user</Button>
                 <Table pagination={{ defaultPageSize: 8, showSizeChanger: false }}
                     size='middle' dataSource={dataWithIndex} columns={usersColumns} className={styles.table} />
                 <Drawer title="Create User" onClose={onInputClose} open={inputOpen}>
@@ -263,18 +334,27 @@ const Index: React.FC = () => {
                             name='firstName'
                             render={({ field }) => <Input {...field} type='text' placeholder='First Name' className={styles.input} />}
                         />
+                        <RenderIf condition={errors.firstName?.message?.length}>
+                            {errors.firstName?.message}
+                        </RenderIf>
 
                         <Controller
                             control={control}
                             name='lastName'
                             render={({ field }) => <Input {...field} type='text' placeholder='Last Name' className={styles.input} />}
                         />
+                        <RenderIf condition={errors.lastName?.message?.length}>
+                            {errors.lastName?.message}
+                        </RenderIf>
 
                         <Controller
                             control={control}
                             name='email'
                             render={({ field }) => <Input {...field} type='email' placeholder='Email' className={styles.input} />}
                         />
+                        <RenderIf condition={errors.email?.message?.length}>
+                            {errors.email?.message}
+                        </RenderIf>
 
                         <Controller
                             control={control}
@@ -282,17 +362,28 @@ const Index: React.FC = () => {
                             render={({ field }) => <Input {...field} type='number' placeholder='Phone Number' className={styles.input} />}
                         />
 
+                        <RenderIf condition={errors.phone?.message?.length}>
+                            {errors.phone?.message}
+                        </RenderIf>
+
                         <Controller
                             control={control}
                             name='password'
                             render={({ field }) => <Input {...field} type='text' placeholder='Password' className={styles.input} />}
                         />
 
+                        <RenderIf condition={errors.password?.message?.length}>
+                            {errors.password?.message}
+                        </RenderIf>
+
                         <Controller
                             control={control}
                             name='confirmPassword'
                             render={({ field }) => <Input {...field} type='text' placeholder='Confirm Password' className={styles.input} />}
                         />
+                        <RenderIf condition={errors.confirmPassword?.message?.length}>
+                            {errors.confirmPassword?.message}
+                        </RenderIf>
 
                         <Button htmlType='submit'>Create user</Button>
                     </form >

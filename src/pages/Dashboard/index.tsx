@@ -1,11 +1,11 @@
-//! zod validate not completed, view the record 
+//! zod validate and edit user not completed
 import { useDeleteUsersMutation, useGetUsersQuery, usePostUsersMutation } from '@/redux/api/users'
 import { Table, Button, Drawer, Input, Modal } from 'antd'
 import React from 'react'
 import styles from './users.module.scss'
 import { Controller, useForm } from 'react-hook-form'
 import { ISendUser, IUsers } from '@/redux/api/users/types'
-import { DeleteOutlined, EyeOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons'
 import { useAppDispatch, useAppSelector } from '@/redux/store'
 import { deleteUser, postUser, toggleUserStatus } from '@/redux/features/User'
 import { FaUserAlt, FaUserEdit } from 'react-icons/fa'
@@ -28,15 +28,22 @@ const Index: React.FC = () => {
 
     //Zod Validation for React-Hook-Form
     const schema = z.object({
-        firstName: z.string().min(),
-        lastName: z.string(),
-        email: z.string(),
-        phone: z.number(),
-        password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
+        firstName: z.string().min(1, { message: 'First Name is required' }).regex(/^\S+$/, "String must not contain spaces"),
+        lastName: z.string().min(1, { message: 'Last Name is required' }).regex(/^\S+$/, "String must not contain spaces"),
+        email: z.string().email().min(1, { message: 'Email is required' }),
+        phone: z.string().regex(/^994\d*$/),
+        password: z.string()
+            .min(8, { message: "Password must be at least 8 characters long." })  // Minimum length validation
+            .regex(
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+            ),
         confirmPassword: z.string()
     })
-
-
+        .refine((data) => data.password === data.confirmPassword, {
+            message: "Passwords do not match.",
+            path: ["confirmPassword"], // The path to set the error message
+        })
 
     //Post User Form
     const { reset, control, formState: { errors, isSubmitSuccessful }, handleSubmit } = useForm({
@@ -93,6 +100,12 @@ const Index: React.FC = () => {
     const handleCancel = () => {
         setIsModalOpen(false);
     };
+
+    // Password Visibilty Button
+    const [showPassword, setShowPassword] = React.useState<boolean>(false)
+    const toggleShowPassword = () => {
+        setShowPassword(!showPassword)
+    }
 
     //Change status of user
     React.useEffect(() => {
@@ -329,62 +342,76 @@ const Index: React.FC = () => {
                     size='middle' dataSource={dataWithIndex} columns={usersColumns} className={styles.table} />
                 <Drawer title="Create User" onClose={onInputClose} open={inputOpen}>
                     <form onSubmit={handleSubmit(onFormSubmit)} className={styles.form}>
-                        <Controller
-                            control={control}
-                            name='firstName'
-                            render={({ field }) => <Input {...field} type='text' placeholder='First Name' className={styles.input} />}
-                        />
-                        <RenderIf condition={errors.firstName?.message?.length}>
-                            {errors.firstName?.message}
-                        </RenderIf>
-
-                        <Controller
-                            control={control}
-                            name='lastName'
-                            render={({ field }) => <Input {...field} type='text' placeholder='Last Name' className={styles.input} />}
-                        />
-                        <RenderIf condition={errors.lastName?.message?.length}>
-                            {errors.lastName?.message}
-                        </RenderIf>
-
-                        <Controller
-                            control={control}
-                            name='email'
-                            render={({ field }) => <Input {...field} type='email' placeholder='Email' className={styles.input} />}
-                        />
-                        <RenderIf condition={errors.email?.message?.length}>
-                            {errors.email?.message}
-                        </RenderIf>
-
-                        <Controller
-                            control={control}
-                            name='phone'
-                            render={({ field }) => <Input {...field} type='number' placeholder='Phone Number' className={styles.input} />}
-                        />
-
-                        <RenderIf condition={errors.phone?.message?.length}>
-                            {errors.phone?.message}
-                        </RenderIf>
-
-                        <Controller
-                            control={control}
-                            name='password'
-                            render={({ field }) => <Input {...field} type='text' placeholder='Password' className={styles.input} />}
-                        />
-
-                        <RenderIf condition={errors.password?.message?.length}>
-                            {errors.password?.message}
-                        </RenderIf>
-
-                        <Controller
-                            control={control}
-                            name='confirmPassword'
-                            render={({ field }) => <Input {...field} type='text' placeholder='Confirm Password' className={styles.input} />}
-                        />
-                        <RenderIf condition={errors.confirmPassword?.message?.length}>
-                            {errors.confirmPassword?.message}
-                        </RenderIf>
-
+                        <div>
+                            <Controller
+                                control={control}
+                                name='firstName'
+                                render={({ field }) => <Input {...field} type='text' placeholder='First Name' className={styles.input} />}
+                            />
+                            <RenderIf condition={errors.firstName?.message?.length}>
+                                <p className={styles.validateError}> {errors.firstName?.message} </p>
+                            </RenderIf>
+                        </div>
+                        <div>
+                            <Controller
+                                control={control}
+                                name='lastName'
+                                render={({ field }) => <Input {...field} type='text' placeholder='Last Name' className={styles.input} />}
+                            />
+                            <RenderIf condition={errors.lastName?.message?.length}>
+                                <p className={styles.validateError}> {errors.lastName?.message} </p>
+                            </RenderIf>
+                        </div>
+                        <div>
+                            <Controller
+                                control={control}
+                                name='email'
+                                render={({ field }) => <Input {...field} type='email' placeholder='Email' className={styles.input} />}
+                            />
+                            <RenderIf condition={errors.email?.message?.length}>
+                                <p className={styles.validateError}> {errors.email?.message} </p>
+                            </RenderIf>
+                        </div>
+                        <div>
+                            <Controller
+                                control={control}
+                                name='phone'
+                                render={({ field }) => <Input {...field} type='number' placeholder='Phone Number' className={styles.input} />}
+                            />
+                            <RenderIf condition={errors.phone?.message?.length}>
+                                <p className={styles.validateError}> {errors.phone?.message} </p>
+                            </RenderIf>
+                        </div>
+                        <div>
+                            <div className={styles.passwordInputDiv}>
+                                <Controller
+                                    control={control}
+                                    name='password'
+                                    render={({ field }) => <Input {...field} type='text' placeholder='Password' className={styles.input} />}
+                                />
+                                <Button className={styles.passwordVisibleButton} onClick={() => toggleShowPassword()}>
+                                    {showPassword ? <EyeInvisibleOutlined className={styles.passwordVisibleIcon} /> : <EyeOutlined className={styles.passwordVisibleIcon} />}
+                                </Button>
+                            </div>
+                            <RenderIf condition={errors.password?.message?.length}>
+                                <p className={styles.validateError}>  {errors.password?.message} </p>
+                            </RenderIf>
+                        </div>
+                        <div>
+                            <div className={styles.passwordInputDiv}>
+                                <Controller
+                                    control={control}
+                                    name='confirmPassword'
+                                    render={({ field }) => <Input {...field} type='text' placeholder='Confirm Password' className={styles.input} />}
+                                />
+                                <Button className={styles.passwordVisibleButton} onClick={() => toggleShowPassword()}>
+                                    {showPassword ? <EyeInvisibleOutlined className={styles.passwordVisibleIcon} /> : <EyeOutlined className={styles.passwordVisibleIcon} />}
+                                </Button>
+                            </div>
+                            <RenderIf condition={errors.confirmPassword?.message?.length}>
+                                <p className={styles.validateError}>  {errors.confirmPassword?.message} </p>
+                            </RenderIf>
+                        </div>
                         <Button htmlType='submit'>Create user</Button>
                     </form >
                 </Drawer >

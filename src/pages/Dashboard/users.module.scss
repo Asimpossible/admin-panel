@@ -10,10 +10,12 @@
 }
 
 .form {
-    @include m.flex($direction: column, $justify: start, $align: center, $gap: 30px)
+    @include m.flex($direction: column, $justify: start, $align: center, $gap: 20px)
 }
 
 .input {
+    width: 320px;
+    margin-bottom: 10px;
     padding: 3px;
     border-radius: 4px;
     font-size: 17px;
@@ -263,4 +265,12 @@ input[type=number] {
             }
         }
     }
+}
+
+.validateError {
+    margin: 0;
+    font-size: 14px;
+    border: solid black;
+    color: red;
+    @include m.flex($justify: left, $align: left);
 }

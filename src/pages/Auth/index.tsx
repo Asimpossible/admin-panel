@@ -55,35 +55,38 @@ const Index: React.FC = () => {
     return (
         <>
             <div className={styles.wrapper}>
-                <div className={styles.formDiv}>
-                    <h1 className={styles.formTitle}>Login</h1>
-                    <form onSubmit={handleSubmit(onSubmit, onError)} className={styles.form}>
-                        <Controller
-                            name='username'
-                            control={control}
-                            render={({ field }) => <Input {...field} type='email' placeholder='Name' className={styles.nameInput} />}
-
-                        />
-                        <div className={styles.passwordInputDiv}>
-
+                <div className={styles.wrapper__left}></div>
+                <div className={styles.wrapper__right}>
+                    <div className={styles.formDiv}>
+                        <h1 className={styles.formTitle}>Login</h1>
+                        <form onSubmit={handleSubmit(onSubmit, onError)} className={styles.form}>
                             <Controller
-                                name='password'
+                                name='username'
                                 control={control}
-                                render={({ field }) =>
-                                    <Input
-                                        {...field}
-                                        type={showPassword ? 'text' : 'password'}
-                                        placeholder='Password'
-                                        className={styles.passwordInput} />}
-                            />
-                            <Button className={styles.passwordVisibleButton} onClick={() => toggleShowPassword()}>
-                                {showPassword ? <EyeInvisibleOutlined className={styles.passwordVisibleIcon} /> : <EyeOutlined className={styles.passwordVisibleIcon} />}
-                            </Button>
-                        </div>
+                                render={({ field }) => <Input {...field} type='email' placeholder='Name' className={styles.nameInput} />}
 
-                        <button type='submit' className={styles.button}>Submit</button>
-                    </form>
-                    <ToastContainer className={styles.toast} />
+                            />
+                            <div className={styles.passwordInputDiv}>
+
+                                <Controller
+                                    name='password'
+                                    control={control}
+                                    render={({ field }) =>
+                                        <Input
+                                            {...field}
+                                            type={showPassword ? 'text' : 'password'}
+                                            placeholder='Password'
+                                            className={styles.passwordInput} />}
+                                />
+                                <Button className={styles.passwordVisibleButton} onClick={() => toggleShowPassword()}>
+                                    {showPassword ? <EyeInvisibleOutlined className={styles.passwordVisibleIcon} /> : <EyeOutlined className={styles.passwordVisibleIcon} />}
+                                </Button>
+                            </div>
+
+                            <button type='submit' className={styles.button}>Submit</button>
+                        </form>
+                        <ToastContainer className={styles.toast} />
+                    </div>
                 </div>
             </div>
         </>

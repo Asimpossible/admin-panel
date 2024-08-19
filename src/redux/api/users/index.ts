@@ -5,6 +5,9 @@ import { postUser } from "@/redux/features/User";
 
 export const userApi = createApi({
     reducerPath: "userApi",
+    tagTypes: [
+        'User'
+    ],
     baseQuery: APIBaseQuery as BaseQueryFn,
     endpoints: (builder) => ({
         getUsers: builder.query<IUsersData, void>({
@@ -13,7 +16,8 @@ export const userApi = createApi({
                     url: 'user',
                     method: 'GET'
                 }
-            }
+            },
+            providesTags: ['User']
         }),
         postUsers: builder.mutation<IUsers[], ISendUser>({
             query(data: ISendUser) {
@@ -23,11 +27,11 @@ export const userApi = createApi({
                     data
                 }
             },
+            invalidatesTags: ['User'],
             async onQueryStarted(_args, { dispatch, queryFulfilled }) {
                 try {
                     const { data } = await queryFulfilled
                     dispatch(postUser(data))
-                    console.log(data)
                 }
                 catch (e) { console.log('post error', e) }
             },

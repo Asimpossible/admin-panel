@@ -66,14 +66,12 @@ const Index: React.FC = () => {
 
     const onFormSubmit = (data: ISendUser): void => {
 
-        try {
-            postingUser(data).unwrap()
-            reset();
-        }
-        catch (e) {
-            console.error('Error occurred in form submission: ', e)
-        }
-        console.error('Error ocurred in form', errors)
+
+        postingUser(data).unwrap()
+
+
+        reset();
+
     }
 
     //Edit user drawer
@@ -88,6 +86,7 @@ const Index: React.FC = () => {
     const closeEditDrawer = () => {
         setDrawerVisible(false);
         setCurrentUser(null);
+        setDrawerVisible(false);
     };
 
     //ANTD Modal

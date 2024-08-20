@@ -1,76 +1,26 @@
-//! zod validate and edit user not completed
-import { useDeleteUsersMutation, useGetUsersQuery, usePostUsersMutation } from '@/redux/api/users'
-import { Table, Button, Drawer, Input, Modal } from 'antd'
+//! edit user not completed and delete not working
+import { useDeleteUsersMutation, useGetUsersQuery } from '@/redux/api/users'
+import { Table, Button, Drawer } from 'antd'
 import React from 'react'
 import styles from './users.module.scss'
-import { Controller, useForm } from 'react-hook-form'
-import { ISendUser, IUsers } from '@/redux/api/users/types'
-import { DeleteOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons'
+import { IUsers } from '@/redux/api/users/types'
+import { DeleteOutlined, EyeOutlined } from '@ant-design/icons'
 import { useAppDispatch, useAppSelector } from '@/redux/store'
 import { deleteUser, postUser, toggleUserStatus } from '@/redux/features/User'
 import { FaUserAlt, FaUserEdit } from 'react-icons/fa'
 import { MdEmail } from 'react-icons/md'
 import { GrStatusGood } from 'react-icons/gr'
-import * as z from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { RenderIf } from '@/shared/components'
+import CreateUser from '@/shared/components/CreateUser'
+import EditUser from '@/shared/components/EditUser'
+import DeleteModal from '@/shared/components/DeleteUser'
 
 const Index: React.FC = () => {
 
     const [currentUser, setCurrentUser] = React.useState<IUsers | null>(null);
     const { data, error, isLoading } = useGetUsersQuery()
-    const [postingUser] = usePostUsersMutation()
     const [deleteUserApi] = useDeleteUsersMutation()
     const dispatch = useAppDispatch()
     const usersData = useAppSelector(state => state.users.data) || []
-
-    //Zod Validation for React-Hook-Form
-    const schema = z.object({
-        firstName: z.string().min(1, { message: 'First Name is required' }).regex(/^(?!\s+$).*/, "String must not contain spaces"),
-        lastName: z.string().min(1, { message: 'Last Name is required' }).regex(/^(?!\s+$).*/, "String must not contain spaces"),
-        email: z.string().email().min(1, { message: 'Email is required' }),
-        phone: z.string().regex(/^994\d*$/),
-        password: z.string()
-            .min(8, { message: "Password must be at least 8 characters long." })  // Minimum length validation
-            .regex(
-                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character."
-            ),
-        confirmPassword: z.string()
-    })
-        .refine((data) => data.password === data.confirmPassword, {
-            message: "Passwords do not match.",
-            path: ["confirmPassword"], // The path to set the error message
-        })
-
-    //Post User Form
-    const { reset, control, formState: { errors, isSubmitSuccessful }, handleSubmit } = useForm({
-        defaultValues: {
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            password: '',
-            confirmPassword: ''
-        },
-        resolver: zodResolver(schema)
-    })
-
-    React.useEffect(() => {
-        if (isSubmitSuccessful) {
-            reset()
-        }
-    }, [isSubmitSuccessful, reset])
-
-    const onFormSubmit = (data: ISendUser): void => {
-
-
-        postingUser(data).unwrap()
-
-
-        reset();
-
-    }
 
     //Edit user drawer
     const [drawerVisible, setDrawerVisible] = React.useState(false);
@@ -96,17 +46,6 @@ const Index: React.FC = () => {
         setIsModalOpen(false);
     };
 
-    // Password Visibilty Button
-    const [showPassword, setShowPassword] = React.useState<boolean>(false)
-    const [showConfirmPassword, setShowConfirmPassword] = React.useState<boolean>(false)
-    const toggleShowPassword = () => {
-        setShowPassword(!showPassword)
-    }
-
-    const toggleShowConfirmPassword = () => {
-        setShowConfirmPassword(!showConfirmPassword)
-    }
-
     //Change status of user
     React.useEffect(() => {
         if (data?.data) {
@@ -120,11 +59,11 @@ const Index: React.FC = () => {
     };
 
     //Function to delete user
-    const handleDeleteUser = async (id: number | undefined) => {
+    const handleDeleteUser = async (id: number) => {
         try {
-            // await deleteUserApi(id)
-            // dispatch(deleteUser(id))
-            // setIsModalOpen(false)
+            await deleteUserApi(id)
+            dispatch(deleteUser(id))
+            setIsModalOpen(false)
             console.log(id)
         }
         catch (error) {
@@ -239,81 +178,8 @@ const Index: React.FC = () => {
                 <Button onClick={showInputDrawer} style={{ marginBottom: '13px', border: '1px solid black' }}>Create the user</Button>
                 <Table pagination={{ defaultPageSize: 8, showSizeChanger: false }}
                     size='middle' dataSource={dataWithIndex} columns={usersColumns} className={styles.table} />
-                <Drawer title="Create User" onClose={onInputClose} open={inputOpen}>
-                    <form onSubmit={handleSubmit(onFormSubmit)} className={styles.form}>
-                        <div>
-                            <Controller
-                                control={control}
-                                name='firstName'
-                                render={({ field }) => <Input {...field} type='text' placeholder='First Name' className={styles.input} />}
-                            />
-                            <RenderIf condition={errors.firstName?.message?.length}>
-                                <p className={styles.validateError}> {errors.firstName?.message} </p>
-                            </RenderIf>
-                        </div>
-                        <div>
-                            <Controller
-                                control={control}
-                                name='lastName'
-                                render={({ field }) => <Input {...field} type='text' placeholder='Last Name' className={styles.input} />}
-                            />
-                            <RenderIf condition={errors.lastName?.message?.length}>
-                                <p className={styles.validateError}> {errors.lastName?.message} </p>
-                            </RenderIf>
-                        </div>
-                        <div>
-                            <Controller
-                                control={control}
-                                name='email'
-                                render={({ field }) => <Input {...field} type='email' placeholder='Email' className={styles.input} />}
-                            />
-                            <RenderIf condition={errors.email?.message?.length}>
-                                <p className={styles.validateError}> {errors.email?.message} </p>
-                            </RenderIf>
-                        </div>
-                        <div>
-                            <Controller
-                                control={control}
-                                name='phone'
-                                render={({ field }) => <Input {...field} type='number' placeholder='Phone Number' className={styles.input} />}
-                            />
-                            <RenderIf condition={errors.phone?.message?.length}>
-                                <p className={styles.validateError}> {errors.phone?.message} </p>
-                            </RenderIf>
-                        </div>
-                        <div>
-                            <div className={styles.passwordInputDiv}>
-                                <Controller
-                                    control={control}
-                                    name='password'
-                                    render={({ field }) => <Input {...field} type={showPassword ? 'text' : 'password'} placeholder='Password' className={styles.input} />}
-                                />
-                                <Button className={styles.passwordVisibleButton} onClick={() => toggleShowPassword()}>
-                                    {showPassword ? <EyeInvisibleOutlined className={styles.passwordVisibleIcon} /> : <EyeOutlined className={styles.passwordVisibleIcon} />}
-                                </Button>
-                            </div>
-                            <RenderIf condition={errors.password?.message?.length}>
-                                <p className={styles.validateError}>  {errors.password?.message} </p>
-                            </RenderIf>
-                        </div>
-                        <div>
-                            <div className={styles.passwordInputDiv}>
-                                <Controller
-                                    control={control}
-                                    name='confirmPassword'
-                                    render={({ field }) => <Input {...field} type={showConfirmPassword ? 'text' : 'password'} placeholder='Confirm Password' className={styles.input} />}
-                                />
-                                <Button className={styles.passwordVisibleButton} onClick={() => toggleShowConfirmPassword()}>
-                                    {showConfirmPassword ? <EyeInvisibleOutlined className={styles.passwordVisibleIcon} /> : <EyeOutlined className={styles.passwordVisibleIcon} />}
-                                </Button>
-                            </div>
-                            <RenderIf condition={errors.confirmPassword?.message?.length}>
-                                <p className={styles.validateError}>  {errors.confirmPassword?.message} </p>
-                            </RenderIf>
-                        </div>
-                        <Button htmlType='submit'>Create user</Button>
-                    </form >
-                </Drawer >
+                {/* Create User Drawer */}
+                <CreateUser onClose={onInputClose} visible={inputOpen} />
 
                 {/* View Drawer */}
                 <Drawer title="View User" onClose={onDrawerClose} open={visible} mask={false}>
@@ -375,53 +241,20 @@ const Index: React.FC = () => {
                     )}
                 </Drawer >
 
-                {/* Edit Drawer*/}
-                <Drawer title="Edit User" mask={false} onClose={closeEditDrawer} open={drawerVisible}>
-                    <form onSubmit={handleSubmit(onFormSubmit)} className={styles.form}>
-                        <Controller
-                            control={control}
-                            name='firstName'
-                            render={({ field }) => <Input {...field} type='text' value={currentUser?.firstName} placeholder='First Name' className={styles.input} />}
-                        />
-
-                        <Controller
-                            control={control}
-                            name='lastName'
-                            render={({ field }) => <Input {...field} type='text' placeholder='Last Name' className={styles.input} />}
-                        />
-
-                        <Controller
-                            control={control}
-                            name='email'
-                            render={({ field }) => <Input {...field} type='email' placeholder='Email' className={styles.input} />}
-                        />
-
-                        <Controller
-                            control={control}
-                            name='phone'
-                            render={({ field }) => <Input {...field} type='number' placeholder='Phone Number' className={styles.input} />}
-                        />
-
-                        <Controller
-                            control={control}
-                            name='password'
-                            render={({ field }) => <Input {...field} type={showPassword ? 'text' : 'password'} placeholder='Password' className={styles.input} />}
-                        />
-
-                        <Controller
-                            control={control}
-                            name='confirmPassword'
-                            render={({ field }) => <Input {...field} type={showPassword ? 'text' : 'password'} placeholder='Confirm Password' className={styles.input} />}
-                        />
-
-                        <Button htmlType='submit'>Edit user</Button>
-                    </form >
-                </Drawer >
+                {/* Edit User Drawer */}
+                <EditUser
+                    visible={drawerVisible}
+                    onClose={closeEditDrawer}
+                    user={currentUser}
+                />
 
                 {/* Delete Modal */}
-                <Modal mask={false} title="Delete" open={isModalOpen} onOk={() => handleDeleteUser(currentUser?.id)} onCancel={handleCancel} okText={'Delete'} onClose={handleCancel} centered={true}>
-                    <h3>Are you sure to delete?</h3>
-                </Modal>
+                <DeleteModal
+                    visible={isModalOpen}
+                    user={currentUser}
+                    onDelete={handleDeleteUser}
+                    onCancel={handleCancel}
+                />
             </div >
         </>
     )

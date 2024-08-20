@@ -36,8 +36,22 @@ export const userApi = createApi({
                 catch (e) { console.log('post error', e) }
             },
         }),
-        deleteUsers: builder.mutation<void, number | undefined>({
-            query(id: number | undefined) {
+        updateUser: builder.mutation<IUsers, { id: number; email: string; phone: string; firstName: string; lastName: string }>({
+            query: (data) => ({
+                url: `/user`, // Adjust the endpoint if needed
+                method: 'PUT', // Use 'PUT' for full update
+                data: {
+                    id: data.id,
+                    email: data.email,
+                    phone: data.phone,
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                },
+            }),
+            invalidatesTags: ['User'],
+        }),
+        deleteUsers: builder.mutation<void, number>({
+            query(id: number) {
                 return {
                     url: 'user',
                     method: 'DELETE',
@@ -52,4 +66,4 @@ export const userApi = createApi({
     })
 })
 
-export const { useGetUsersQuery, usePostUsersMutation, useDeleteUsersMutation } = userApi
+export const { useGetUsersQuery, usePostUsersMutation, useUpdateUserMutation, useDeleteUsersMutation } = userApi

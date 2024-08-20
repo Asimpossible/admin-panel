@@ -1,0 +1,42 @@
+@use '../../../scss/mixins' as m;
+
+.form {
+    @include m.flex($direction: column, $justify: start, $align: center, $gap: 20px)
+}
+
+.input {
+    width: 320px;
+    margin-bottom: 10px;
+    padding: 3px;
+    border-radius: 4px;
+    font-size: 17px;
+    border: none;
+    border-bottom: 0.5px solid black;
+    transition: 0.1s;
+
+    &:hover,
+    &:focus {
+        outline: none;
+        border-bottom: 2px solid;
+        box-shadow: none
+    }
+}
+
+/* Remove spinners for WebKit browsers in number type input */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Remove spinners for Firefox in number type input*/
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.validateError {
+    margin: 0;
+    font-size: 14px;
+    color: red;
+    @include m.flex($justify: left, $align: left);
+}

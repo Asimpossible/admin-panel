@@ -11,25 +11,23 @@ import { deleteUser, postUser, toggleUserStatus } from '@/redux/features/User'
 import { FaUserAlt, FaUserEdit } from 'react-icons/fa'
 import { MdEmail } from 'react-icons/md'
 import { GrStatusGood } from 'react-icons/gr'
-import { useNavigate } from 'react-router-dom'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { RenderIf } from '@/shared/components'
 
 const Index: React.FC = () => {
 
+    const [currentUser, setCurrentUser] = React.useState<IUsers | null>(null);
     const { data, error, isLoading } = useGetUsersQuery()
     const [postingUser] = usePostUsersMutation()
     const [deleteUserApi] = useDeleteUsersMutation()
     const dispatch = useAppDispatch()
     const usersData = useAppSelector(state => state.users.data) || []
-    //For reset current page in on form submit and delete user
-    const navigate = useNavigate()
 
     //Zod Validation for React-Hook-Form
     const schema = z.object({
-        firstName: z.string().min(1, { message: 'First Name is required' }).regex(/^\S+$/, "String must not contain spaces"),
-        lastName: z.string().min(1, { message: 'Last Name is required' }).regex(/^\S+$/, "String must not contain spaces"),
+        firstName: z.string().min(1, { message: 'First Name is required' }).regex(/^(?!\s+$).*/, "String must not contain spaces"),
+        lastName: z.string().min(1, { message: 'Last Name is required' }).regex(/^(?!\s+$).*/, "String must not contain spaces"),
         email: z.string().email().min(1, { message: 'Email is required' }),
         phone: z.string().regex(/^994\d*$/),
         password: z.string()
@@ -76,7 +74,6 @@ const Index: React.FC = () => {
 
     //Edit user drawer
     const [drawerVisible, setDrawerVisible] = React.useState(false);
-    const [currentUser, setCurrentUser] = React.useState<IUsers | null>(null);
 
     const showEditDrawer = (user: IUsers) => {
         setCurrentUser(user);
@@ -86,7 +83,6 @@ const Index: React.FC = () => {
     const closeEditDrawer = () => {
         setDrawerVisible(false);
         setCurrentUser(null);
-        setDrawerVisible(false);
     };
 
     //ANTD Modal
@@ -102,8 +98,13 @@ const Index: React.FC = () => {
 
     // Password Visibilty Button
     const [showPassword, setShowPassword] = React.useState<boolean>(false)
+    const [showConfirmPassword, setShowConfirmPassword] = React.useState<boolean>(false)
     const toggleShowPassword = () => {
         setShowPassword(!showPassword)
+    }
+
+    const toggleShowConfirmPassword = () => {
+        setShowConfirmPassword(!showConfirmPassword)
     }
 
     //Change status of user
@@ -119,13 +120,12 @@ const Index: React.FC = () => {
     };
 
     //Function to delete user
-    const handleDeleteUser = async (id: number) => {
+    const handleDeleteUser = async (id: number | undefined) => {
         try {
-            await deleteUserApi(id)
-            dispatch(deleteUser(id))
-            setIsModalOpen(false)
-            reset()
-            navigate(0)
+            // await deleteUserApi(id)
+            // dispatch(deleteUser(id))
+            // setIsModalOpen(false)
+            console.log(id)
         }
         catch (error) {
             console.error('Error occurred with delete user', error)
@@ -164,9 +164,9 @@ const Index: React.FC = () => {
     if (isLoading) return <h2>Loading users...</h2>
 
     //ANTD Table
-    const dataWithIndex = usersData.map((item, index) => ({
+    const dataWithIndex = usersData.map((item, id) => ({
         ...item,
-        key: index,
+        key: id,
     })) || [];
 
 
@@ -211,109 +211,11 @@ const Index: React.FC = () => {
                     <button className={styles.viewButton} onClick={() => showViewDrawer(record)}>
                         <EyeOutlined />
                     </button>
-                    <Drawer title="Basic Drawer" onClose={onDrawerClose} open={visible} mask={false}>
-                        {drawerContent && (
 
-                            <div className={styles.card}>
-                                <div className={styles.tools}>
-                                    <div className={styles.circle}>
-                                        <span className={`${styles.red} ${styles.box}`}></span>
-                                    </div>
-                                    <div className={styles.circle}>
-                                        <span className={`${styles.yellow} ${styles.box}`}></span>
-                                    </div>
-                                    <div className={styles.circle}>
-                                        <span className={`${styles.green} ${styles.box}`}></span>
-                                    </div>
-                                </div>
-                                <div className={styles.card__content}>
-                                    <div className={styles.contentDiv}>
-                                        <div className={styles.contentIcon}><FaUserAlt /></div>
-                                        <div className={styles.contentInnerDiv}>
-                                            <div className={styles.content}>
-                                                {drawerContent.firstName}
-                                            </div>
-                                            <div className={styles.contentInner}>First Name</div>
-                                        </div>
-                                    </div>
-                                    <div className={styles.contentDiv}>
-                                        <div className={styles.contentIcon}><FaUserAlt /></div>
-                                        <div className={styles.contentInnerDiv}>
-                                            <div className={styles.content}>
-                                                {drawerContent.lastName}
-                                            </div>
-                                            <div className={styles.contentInner}>Last Name</div>
-                                        </div>
-                                    </div>
-                                    <div className={styles.contentDiv}>
-                                        <div className={styles.contentIcon}><MdEmail /></div>
-                                        <div className={styles.contentInnerDiv}>
-                                            <div className={styles.content}>
-                                                {drawerContent.email}
-                                            </div>
-                                            <div className={styles.contentInner}>Email</div>
-                                        </div>
-                                    </div>
-                                    <div className={styles.contentDiv}>
-                                        <div className={styles.contentIcon}><GrStatusGood /></div>
-                                        <div className={styles.contentInnerDiv}>
-                                            <div className={styles.content}>
-                                                {drawerContent.isActive ? 'Active' : 'InActive'}
-                                            </div>
-                                            <div className={styles.contentInner}>Status</div>
-                                        </div>
 
-                                    </div>
-                                </div>
-                            </div>
-
-                        )}
-                    </Drawer >
-
-                    {/*Edit Button */}
+                    {/* Edit Button */}
                     <button className={styles.editButton} onClick={() => showEditDrawer(record)}>
                         <FaUserEdit />
-                        <Drawer title="Edit User" mask={false} onClose={closeEditDrawer} open={drawerVisible}>
-                            <form onSubmit={handleSubmit(onFormSubmit)} className={styles.form}>
-                                <Controller
-                                    control={control}
-                                    name='firstName'
-                                    render={({ field }) => <Input {...field} type='text' value={record.firstName} placeholder='First Name' className={styles.input} />}
-                                />
-
-                                <Controller
-                                    control={control}
-                                    name='lastName'
-                                    render={({ field }) => <Input {...field} type='text' placeholder='Last Name' className={styles.input} />}
-                                />
-
-                                <Controller
-                                    control={control}
-                                    name='email'
-                                    render={({ field }) => <Input {...field} type='email' placeholder='Email' className={styles.input} />}
-                                />
-
-                                <Controller
-                                    control={control}
-                                    name='phone'
-                                    render={({ field }) => <Input {...field} type='number' placeholder='Phone Number' className={styles.input} />}
-                                />
-
-                                <Controller
-                                    control={control}
-                                    name='password'
-                                    render={({ field }) => <Input {...field} type='text' placeholder='Password' className={styles.input} />}
-                                />
-
-                                <Controller
-                                    control={control}
-                                    name='confirmPassword'
-                                    render={({ field }) => <Input {...field} type='text' placeholder='Confirm Password' className={styles.input} />}
-                                />
-
-                                <Button htmlType='submit'>Create user</Button>
-                            </form >
-                        </Drawer >
                     </button>
 
 
@@ -323,9 +225,7 @@ const Index: React.FC = () => {
                     }}>
                         <DeleteOutlined />
                     </button >
-                    <Modal mask={false} title="Delete" open={isModalOpen} onOk={() => handleDeleteUser(record.id)} onCancel={handleCancel} okText={'Delete'} onClose={handleCancel} centered={true}>
-                        <h3>Are you sure to delete?</h3>
-                    </Modal>
+
                 </div >
             )
         }
@@ -386,7 +286,7 @@ const Index: React.FC = () => {
                                 <Controller
                                     control={control}
                                     name='password'
-                                    render={({ field }) => <Input {...field} type='text' placeholder='Password' className={styles.input} />}
+                                    render={({ field }) => <Input {...field} type={showPassword ? 'text' : 'password'} placeholder='Password' className={styles.input} />}
                                 />
                                 <Button className={styles.passwordVisibleButton} onClick={() => toggleShowPassword()}>
                                     {showPassword ? <EyeInvisibleOutlined className={styles.passwordVisibleIcon} /> : <EyeOutlined className={styles.passwordVisibleIcon} />}
@@ -401,10 +301,10 @@ const Index: React.FC = () => {
                                 <Controller
                                     control={control}
                                     name='confirmPassword'
-                                    render={({ field }) => <Input {...field} type='text' placeholder='Confirm Password' className={styles.input} />}
+                                    render={({ field }) => <Input {...field} type={showConfirmPassword ? 'text' : 'password'} placeholder='Confirm Password' className={styles.input} />}
                                 />
-                                <Button className={styles.passwordVisibleButton} onClick={() => toggleShowPassword()}>
-                                    {showPassword ? <EyeInvisibleOutlined className={styles.passwordVisibleIcon} /> : <EyeOutlined className={styles.passwordVisibleIcon} />}
+                                <Button className={styles.passwordVisibleButton} onClick={() => toggleShowConfirmPassword()}>
+                                    {showConfirmPassword ? <EyeInvisibleOutlined className={styles.passwordVisibleIcon} /> : <EyeOutlined className={styles.passwordVisibleIcon} />}
                                 </Button>
                             </div>
                             <RenderIf condition={errors.confirmPassword?.message?.length}>
@@ -414,6 +314,114 @@ const Index: React.FC = () => {
                         <Button htmlType='submit'>Create user</Button>
                     </form >
                 </Drawer >
+
+                {/* View Drawer */}
+                <Drawer title="View User" onClose={onDrawerClose} open={visible} mask={false}>
+                    {drawerContent && (
+
+                        <div className={styles.card}>
+                            <div className={styles.tools}>
+                                <div className={styles.circle}>
+                                    <span className={`${styles.red} ${styles.box}`}></span>
+                                </div>
+                                <div className={styles.circle}>
+                                    <span className={`${styles.yellow} ${styles.box}`}></span>
+                                </div>
+                                <div className={styles.circle}>
+                                    <span className={`${styles.green} ${styles.box}`}></span>
+                                </div>
+                            </div>
+                            <div className={styles.card__content}>
+                                <div className={styles.contentDiv}>
+                                    <div className={styles.contentIcon}><FaUserAlt /></div>
+                                    <div className={styles.contentInnerDiv}>
+                                        <div className={styles.content}>
+                                            {drawerContent.firstName}
+                                        </div>
+                                        <div className={styles.contentInner}>First Name</div>
+                                    </div>
+                                </div>
+                                <div className={styles.contentDiv}>
+                                    <div className={styles.contentIcon}><FaUserAlt /></div>
+                                    <div className={styles.contentInnerDiv}>
+                                        <div className={styles.content}>
+                                            {drawerContent.lastName}
+                                        </div>
+                                        <div className={styles.contentInner}>Last Name</div>
+                                    </div>
+                                </div>
+                                <div className={styles.contentDiv}>
+                                    <div className={styles.contentIcon}><MdEmail /></div>
+                                    <div className={styles.contentInnerDiv}>
+                                        <div className={styles.content}>
+                                            {drawerContent.email}
+                                        </div>
+                                        <div className={styles.contentInner}>Email</div>
+                                    </div>
+                                </div>
+                                <div className={styles.contentDiv}>
+                                    <div className={styles.contentIcon}><GrStatusGood /></div>
+                                    <div className={styles.contentInnerDiv}>
+                                        <div className={styles.content}>
+                                            {drawerContent.isActive ? 'Active' : 'InActive'}
+                                        </div>
+                                        <div className={styles.contentInner}>Status</div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    )}
+                </Drawer >
+
+                {/* Edit Drawer*/}
+                <Drawer title="Edit User" mask={false} onClose={closeEditDrawer} open={drawerVisible}>
+                    <form onSubmit={handleSubmit(onFormSubmit)} className={styles.form}>
+                        <Controller
+                            control={control}
+                            name='firstName'
+                            render={({ field }) => <Input {...field} type='text' value={currentUser?.firstName} placeholder='First Name' className={styles.input} />}
+                        />
+
+                        <Controller
+                            control={control}
+                            name='lastName'
+                            render={({ field }) => <Input {...field} type='text' placeholder='Last Name' className={styles.input} />}
+                        />
+
+                        <Controller
+                            control={control}
+                            name='email'
+                            render={({ field }) => <Input {...field} type='email' placeholder='Email' className={styles.input} />}
+                        />
+
+                        <Controller
+                            control={control}
+                            name='phone'
+                            render={({ field }) => <Input {...field} type='number' placeholder='Phone Number' className={styles.input} />}
+                        />
+
+                        <Controller
+                            control={control}
+                            name='password'
+                            render={({ field }) => <Input {...field} type={showPassword ? 'text' : 'password'} placeholder='Password' className={styles.input} />}
+                        />
+
+                        <Controller
+                            control={control}
+                            name='confirmPassword'
+                            render={({ field }) => <Input {...field} type={showPassword ? 'text' : 'password'} placeholder='Confirm Password' className={styles.input} />}
+                        />
+
+                        <Button htmlType='submit'>Edit user</Button>
+                    </form >
+                </Drawer >
+
+                {/* Delete Modal */}
+                <Modal mask={false} title="Delete" open={isModalOpen} onOk={() => handleDeleteUser(currentUser?.id)} onCancel={handleCancel} okText={'Delete'} onClose={handleCancel} centered={true}>
+                    <h3>Are you sure to delete?</h3>
+                </Modal>
             </div >
         </>
     )

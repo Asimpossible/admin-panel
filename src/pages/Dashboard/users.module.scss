@@ -270,7 +270,6 @@ input[type=number] {
 .validateError {
     margin: 0;
     font-size: 14px;
-    border: solid black;
     color: red;
     @include m.flex($justify: left, $align: left);
 }

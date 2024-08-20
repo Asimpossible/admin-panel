@@ -36,8 +36,8 @@ export const userApi = createApi({
                 catch (e) { console.log('post error', e) }
             },
         }),
-        deleteUsers: builder.mutation<void, number>({
-            query(id: number) {
+        deleteUsers: builder.mutation<void, number | undefined>({
+            query(id: number | undefined) {
                 return {
                     url: 'user',
                     method: 'DELETE',
@@ -46,7 +46,8 @@ export const userApi = createApi({
                         'Content-Type': 'appplication/json'
                     }
                 }
-            }
+            },
+            invalidatesTags: ['User']
         })
     })
 })

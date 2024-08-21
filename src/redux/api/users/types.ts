@@ -20,3 +20,8 @@ export interface ISendUser {
     password: string
     confirmPassword: string
 }
+
+export interface IUserStatus {
+    id: number;
+    isActive: boolean
+}

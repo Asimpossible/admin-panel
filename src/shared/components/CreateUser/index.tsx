@@ -27,17 +27,23 @@ const CreateUser: React.FC<{ onClose: () => void; visible: boolean }> = ({ onClo
         path: ["confirmPassword"],
     });
 
-    const { reset, control, formState: { errors, isSubmitSuccessful }, handleSubmit } = useForm({
+    const { reset, control, formState: { errors, isSubmitSuccessful }, handleSubmit, setValue } = useForm({
         defaultValues: {
             firstName: '',
             lastName: '',
             email: '',
-            phone: '',
+            phone: '994',
             password: '',
             confirmPassword: ''
         },
         resolver: zodResolver(schema),
     });
+
+    React.useEffect(() => {
+        if (!visible) {
+            reset();
+        }
+    }, [visible, reset]);
 
     React.useEffect(() => {
         if (isSubmitSuccessful) {
@@ -56,17 +62,14 @@ const CreateUser: React.FC<{ onClose: () => void; visible: boolean }> = ({ onClo
     const [showConfirmPassword, setShowConfirmPassword] = React.useState<boolean>(false);
     const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
 
-    const defaultString = '994'; // Your default string
-    const [inputValue, setInputValue] = React.useState<string>(defaultString);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // Update the input value while preserving the default string
-        const { value } = e.target;
-        if (value.startsWith(defaultString)) {
-            setInputValue(value);
-        } else {
-            setInputValue(defaultString + value);
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
+        let { value } = e.target;
+        if (!value.startsWith('994')) {
+            value = '994' + value.replace(/[^0-9]/g, '');
         }
+        onChange(value); // Update the value in React Hook Form
+        setValue('phone', value); // Update the phone field in React Hook Form
     };
 
     return (
@@ -108,11 +111,13 @@ const CreateUser: React.FC<{ onClose: () => void; visible: boolean }> = ({ onClo
                         control={control}
                         name='phone'
                         render={({ field }) =>
-                            <Input {...field}
+                            <Input
+                                {...field}
                                 placeholder='Phone Number'
-                                value={inputValue}
-                                onChange={handleChange}
-                                className={styles.input} />}
+                                onChange={(e) => handlePhoneChange(e, field.onChange)}
+                                className={styles.input}
+                            />
+                        }
                     />
                     <RenderIf condition={errors.phone?.message?.length}>
                         <p className={styles.validateError}>{errors.phone?.message}</p>

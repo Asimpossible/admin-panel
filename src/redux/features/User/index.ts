@@ -23,8 +23,8 @@ export const usersSlice = createSlice({
             state.data = action.payload
             state.totalCount = action.payload.length
         },
-        toggleUserStatus: (state, action: PayloadAction<number>) => {
-            const user = state.data.find(user => user.id === action.payload)
+        toggleUserStatus: (state, action: PayloadAction<{ id: number, isActive: boolean }>) => {
+            const user = state.data.find(user => user.id === action.payload.id)
             if (user) {
                 user.isActive = !user.isActive
             }

@@ -24,12 +24,12 @@ const EditUser: React.FC<EditUserProps> = ({ visible, onClose, user }) => {
         phone: z.string()
     })
 
-    const { control, formState: { errors }, handleSubmit, reset } = useForm({
+    const { control, formState: { errors }, handleSubmit, reset, setValue } = useForm({
         defaultValues: {
             firstName: user?.firstName || '',
             lastName: user?.lastName || '',
             email: user?.email || '',
-            phone: user?.phone || '',
+            phone: user?.phone || '994',
             password: '',
             confirmPassword: '',
         },
@@ -59,27 +59,26 @@ const EditUser: React.FC<EditUserProps> = ({ visible, onClose, user }) => {
                 lastName: data.lastName,
             };
             try {
-                await updateUser(updateData).unwrap(); // Call the mutation with the structured data
+                await updateUser(updateData)
                 reset();
-                onClose(); // Close the drawer
-                // Optionally, you can refetch or update local state here
+                onClose();
+
             } catch (error) {
                 console.error('Error updating user:', error);
             }
         }
+        else {
+            console.error('User data is null or undefined.');
+        }
     };
 
-    const defaultString = '994'; // Your default string
-    const [inputValue, setInputValue] = React.useState<string>(defaultString);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // Update the input value while preserving the default string
-        const { value } = e.target;
-        if (value.startsWith(defaultString)) {
-            setInputValue(value);
-        } else {
-            setInputValue(defaultString + value);
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
+        let { value } = e.target;
+        if (!value.startsWith('994')) {
+            value = '994' + value.replace(/[^0-9]/g, '');
         }
+        onChange(value); // Update the value in React Hook Form
+        setValue('phone', value); // Update the phone field in React Hook Form
     };
 
     return (
@@ -123,8 +122,7 @@ const EditUser: React.FC<EditUserProps> = ({ visible, onClose, user }) => {
                         render={({ field }) =>
                             <Input {...field}
                                 placeholder='Phone Number'
-                                value={inputValue}
-                                onChange={handleChange}
+                                onChange={(e) => handlePhoneChange(e, field.onChange)}
                                 className={styles.input} />}
                     />
                     <RenderIf condition={errors.phone?.message?.length}>

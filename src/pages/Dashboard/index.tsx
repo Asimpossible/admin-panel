@@ -1,12 +1,13 @@
-//! edit user not completed and delete not working
-import { useDeleteUsersMutation, useGetUsersQuery } from '@/redux/api/users'
+//*edit and delete user completed
+//!change status not completed
+import { useChangeStatusMutation, useDeleteUsersMutation, useGetUsersQuery } from '@/redux/api/users'
 import { Table, Button, Drawer } from 'antd'
 import React from 'react'
 import styles from './users.module.scss'
 import { IUsers } from '@/redux/api/users/types'
 import { DeleteOutlined, EyeOutlined } from '@ant-design/icons'
-import { useAppDispatch, useAppSelector } from '@/redux/store'
-import { deleteUser, postUser, toggleUserStatus } from '@/redux/features/User'
+import { useAppDispatch } from '@/redux/store'
+import { deleteUser, toggleUserStatus } from '@/redux/features/User'
 import { FaUserAlt, FaUserEdit } from 'react-icons/fa'
 import { MdEmail } from 'react-icons/md'
 import { GrStatusGood } from 'react-icons/gr'
@@ -18,9 +19,9 @@ const Index: React.FC = () => {
 
     const [currentUser, setCurrentUser] = React.useState<IUsers | null>(null);
     const { data, error, isLoading } = useGetUsersQuery()
-    const [deleteUserApi] = useDeleteUsersMutation()
+    const [deleteUserApi] = useDeleteUsersMutation();
+    const [changeStatus] = useChangeStatusMutation();
     const dispatch = useAppDispatch()
-    const usersData = useAppSelector(state => state.users.data) || []
 
     //Edit user drawer
     const [drawerVisible, setDrawerVisible] = React.useState(false);
@@ -35,27 +36,30 @@ const Index: React.FC = () => {
         setCurrentUser(null);
     };
 
-    //ANTD Modal
+    //ANTD Delete Modal
     const [isModalOpen, setIsModalOpen] = React.useState(false);
 
-    const showModal = () => {
+    const showDeleteModal = (user: IUsers) => {
         setIsModalOpen(true);
+        setCurrentUser(user);
     };
 
-    const handleCancel = () => {
+    const handleDeleteCancel = () => {
         setIsModalOpen(false);
+        setCurrentUser(null)
     };
 
     //Change status of user
-    React.useEffect(() => {
-        if (data?.data) {
-            dispatch(postUser(data?.data))
+    const handleChangeStatus = async (user: IUsers) => {
+        try {
+            await changeStatus({ id: user.id, isActive: !user.isActive }).unwrap();
+            dispatch(toggleUserStatus({ id: user.id, isActive: !user.isActive }));
+            // Optionally, you can show a success message or refresh the data
+            console.log('User status updated successfully');
+        } catch (error) {
+            console.error('Failed to change status:', error);
+            // Optionally, show an error message to the user
         }
-    }, [data, dispatch]);
-
-    // Function to handle status change
-    const handleButtonClick = (id: number) => {
-        dispatch(toggleUserStatus(id))
     };
 
     //Function to delete user
@@ -64,7 +68,6 @@ const Index: React.FC = () => {
             await deleteUserApi(id)
             dispatch(deleteUser(id))
             setIsModalOpen(false)
-            console.log(id)
         }
         catch (error) {
             console.error('Error occurred with delete user', error)
@@ -103,7 +106,7 @@ const Index: React.FC = () => {
     if (isLoading) return <h2>Loading users...</h2>
 
     //ANTD Table
-    const dataWithIndex = usersData.map((item, id) => ({
+    const dataWithIndex = data?.data.map((item, id) => ({
         ...item,
         key: id,
     })) || [];
@@ -135,7 +138,7 @@ const Index: React.FC = () => {
             dataIndex: 'status',
             key: 'status',
             render: (_: unknown, record: IUsers) => (
-                <Button style={{}} onClick={() => handleButtonClick(record.id)}>
+                <Button style={{}} onClick={() => handleChangeStatus(record)}>
                     {record.isActive ? 'Active' : 'Inactive'}
                 </Button>
             )
@@ -160,7 +163,7 @@ const Index: React.FC = () => {
 
                     {/* Delete Button*/}
                     < button className={styles.deleteButton} onClick={() => {
-                        showModal()
+                        showDeleteModal(record)
                     }}>
                         <DeleteOutlined />
                     </button >
@@ -253,7 +256,7 @@ const Index: React.FC = () => {
                     visible={isModalOpen}
                     user={currentUser}
                     onDelete={handleDeleteUser}
-                    onCancel={handleCancel}
+                    onCancel={handleDeleteCancel}
                 />
             </div >
         </>

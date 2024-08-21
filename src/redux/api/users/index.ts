@@ -1,6 +1,6 @@
 import { BaseQueryFn, createApi } from "@reduxjs/toolkit/query/react";
 import { APIBaseQuery } from "../axiosBase";
-import { ISendUser, IUsers, IUsersData } from "./types";
+import { ISendUser, IUsers, IUsersData, IUserStatus } from "./types";
 import { postUser } from "@/redux/features/User";
 
 export const userApi = createApi({
@@ -36,9 +36,19 @@ export const userApi = createApi({
                 catch (e) { console.log('post error', e) }
             },
         }),
+        changeStatus: builder.mutation<void, IUserStatus>({
+            query({ id, isActive }) {
+                return ({
+                    url: 'user/active',
+                    method: 'PATCH',
+                    data: { id, isActive }
+                })
+            },
+            invalidatesTags: ['User']
+        }),
         updateUser: builder.mutation<IUsers, { id: number; email: string; phone: string; firstName: string; lastName: string }>({
             query: (data) => ({
-                url: `/user`, // Adjust the endpoint if needed
+                url: `user`, // Adjust the endpoint if needed
                 method: 'PUT', // Use 'PUT' for full update
                 data: {
                     id: data.id,
@@ -66,4 +76,4 @@ export const userApi = createApi({
     })
 })
 
-export const { useGetUsersQuery, usePostUsersMutation, useUpdateUserMutation, useDeleteUsersMutation } = userApi
+export const { useGetUsersQuery, usePostUsersMutation, useUpdateUserMutation, useDeleteUsersMutation, useChangeStatusMutation } = userApi

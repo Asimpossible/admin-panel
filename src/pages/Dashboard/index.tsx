@@ -1,5 +1,3 @@
-//*edit and delete user completed
-//!change status not completed
 import { useChangeStatusMutation, useDeleteUsersMutation, useGetUsersQuery } from '@/redux/api/users'
 import { Table, Button, Drawer } from 'antd'
 import React from 'react'
@@ -17,6 +15,7 @@ import DeleteModal from '@/shared/components/DeleteUser'
 
 const Index: React.FC = () => {
 
+    const [modal, setModal] = React.useState({})
     const [currentUser, setCurrentUser] = React.useState<IUsers | null>(null);
     const { data, error, isLoading } = useGetUsersQuery()
     const [deleteUserApi] = useDeleteUsersMutation();
